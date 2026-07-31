@@ -32626,12 +32626,12 @@ var FetchBackend = class _FetchBackend {
       };
     });
   }
-  async doRequest(request, signal2, observer) {
+  async doRequest(request, signal3, observer) {
     const init = this.createRequestInit(request);
     let response;
     try {
       const fetchPromise = this.ngZone.runOutsideAngular(() => this.fetchImpl(request.urlWithParams, __spreadValues({
-        signal: signal2
+        signal: signal3
       }, init)));
       silenceSuperfluousUnhandledPromiseRejection(fetchPromise);
       observer.next({
@@ -36844,8 +36844,8 @@ function prioritizedGuardValue() {
 function isRedirect(val) {
   return isUrlTree(val) || val instanceof RedirectCommand;
 }
-function abortSignalToObservable(signal2) {
-  if (signal2.aborted) {
+function abortSignalToObservable(signal3) {
+  if (signal3.aborted) {
     return of(void 0).pipe(take(1));
   }
   return new Observable((subscriber) => {
@@ -36853,12 +36853,12 @@ function abortSignalToObservable(signal2) {
       subscriber.next();
       subscriber.complete();
     };
-    signal2.addEventListener("abort", handler);
-    return () => signal2.removeEventListener("abort", handler);
+    signal3.addEventListener("abort", handler);
+    return () => signal3.removeEventListener("abort", handler);
   });
 }
-function takeUntilAbort(signal2) {
-  return takeUntil(abortSignalToObservable(signal2));
+function takeUntilAbort(signal3) {
+  return takeUntil(abortSignalToObservable(signal3));
 }
 function checkGuards(forwardEvent) {
   return mergeMap((t) => {
@@ -65201,7 +65201,7 @@ var FieldNodeState = class {
       const debouncerLogic = this.node.logicNode.logic.getMetadata(DEBOUNCER);
       const debouncer = debouncerLogic.compute(this.node.context);
       if (debouncer) {
-        return (signal2) => debouncer(this.node.context, signal2);
+        return (signal3) => debouncer(this.node.context, signal3);
       }
     }
     return this.node.structure.parent?.nodeState.debouncer?.();
@@ -70363,453 +70363,57 @@ var appConfig = {
   ]
 };
 
+// src/app/shared/icon-service.ts
+var IconService = class _IconService {
+  matIconRegistry = inject2(MatIconRegistry);
+  constructor() {
+    this.matIconRegistry.setDefaultFontSetClass("material-symbols-outlined");
+  }
+  fillIcon() {
+    return "font-variation-settings:  'FILL' 1;";
+  }
+  static \u0275fac = function IconService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || _IconService)();
+  };
+  static \u0275prov = /* @__PURE__ */ \u0275\u0275defineService({ token: _IconService, factory: _IconService.\u0275fac });
+};
+(() => {
+  (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(IconService, [{
+    type: Service
+  }], () => [], null);
+})();
+
 // src/app/app.ts
-var _c011 = () => ({ title: "Explore the Docs", link: "https://angular.dev" });
-var _c17 = () => ({ title: "Learn with Tutorials", link: "https://angular.dev/tutorials" });
-var _c24 = () => ({ title: "Prompt and best practices for AI", link: "https://angular.dev/ai/develop-with-ai" });
-var _c33 = () => ({ title: "CLI Docs", link: "https://angular.dev/tools/cli" });
-var _c43 = () => ({ title: "Angular Language Service", link: "https://angular.dev/tools/language-service" });
-var _c52 = () => ({ title: "Angular DevTools", link: "https://angular.dev/tools/devtools" });
-var _c62 = (a0, a1, a2, a3, a4, a5) => [a0, a1, a2, a3, a4, a5];
-var _forTrack02 = ($index, $item) => $item.title;
-function App_For_27_Template(rf, ctx) {
-  if (rf & 1) {
-    \u0275\u0275elementStart(0, "a", 21)(1, "span");
-    \u0275\u0275text(2);
-    \u0275\u0275elementEnd();
-    \u0275\u0275namespaceSVG();
-    \u0275\u0275elementStart(3, "svg", 32);
-    \u0275\u0275element(4, "path", 33);
-    \u0275\u0275elementEnd()();
-  }
-  if (rf & 2) {
-    const item_r1 = ctx.$implicit;
-    \u0275\u0275property("href", item_r1.link, \u0275\u0275sanitizeUrl);
-    \u0275\u0275advance(2);
-    \u0275\u0275textInterpolate(item_r1.title);
-  }
-}
 var App = class _App {
-  title = signal(
-    "AngApp",
-    ...ngDevMode ? [{ debugName: "title" }] : (
-      /* istanbul ignore next */
-      []
-    )
-  );
+  iconService = inject2(IconService);
+  oidcSecurityService = inject2(OidcSecurityService);
+  singleton = inject2(SingletonService);
+  ngOnInit() {
+    this.oidcSecurityService.checkAuth().subscribe(({ isAuthenticated }) => {
+      console.log("isAuthenticated: " + isAuthenticated);
+      this.singleton.authChekced.set(true);
+    });
+  }
   static \u0275fac = function App_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _App)();
   };
-  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _App, selectors: [["app-root"]], decls: 39, vars: 14, consts: [[1, "main"], [1, "content"], [1, "left-side"], ["xmlns", "http://www.w3.org/2000/svg", "viewBox", "0 0 982 239", "fill", "none", 1, "angular-logo"], ["clip-path", "url(#a)"], ["fill", "url(#b)", "d", "M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"], ["fill", "url(#c)", "d", "M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"], ["id", "c", "cx", "0", "cy", "0", "r", "1", "gradientTransform", "rotate(118.122 171.182 60.81) scale(205.794)", "gradientUnits", "userSpaceOnUse"], ["stop-color", "#FF41F8"], ["offset", ".707", "stop-color", "#FF41F8", "stop-opacity", ".5"], ["offset", "1", "stop-color", "#FF41F8", "stop-opacity", "0"], ["id", "b", "x1", "0", "x2", "982", "y1", "192", "y2", "192", "gradientUnits", "userSpaceOnUse"], ["stop-color", "#F0060B"], ["offset", "0", "stop-color", "#F0070C"], ["offset", ".526", "stop-color", "#CC26D5"], ["offset", "1", "stop-color", "#7702FF"], ["id", "a"], ["fill", "#fff", "d", "M0 0h982v239H0z"], ["role", "separator", "aria-label", "Divider", 1, "divider"], [1, "right-side"], [1, "pill-group"], ["target", "_blank", "rel", "noopener", 1, "pill", 3, "href"], [1, "social-links"], ["href", "https://github.com/angular/angular", "aria-label", "Github", "target", "_blank", "rel", "noopener"], ["width", "25", "height", "24", "viewBox", "0 0 25 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", "alt", "Github"], ["d", "M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.52529 22.3535 8.41332 23.9787C9.02856 24.0946 9.25414 23.7142 9.25414 23.3871C9.25414 23.0949 9.24389 22.3207 9.23876 21.2953C5.81601 22.0377 5.09414 19.6444 5.09414 19.6444C4.53427 18.2243 3.72524 17.8449 3.72524 17.8449C2.61064 17.082 3.81137 17.0973 3.81137 17.0973C5.04697 17.1835 5.69604 18.3647 5.69604 18.3647C6.79321 20.2463 8.57636 19.7029 9.27978 19.3881C9.39052 18.5924 9.70736 18.0499 10.0591 17.7423C7.32641 17.4347 4.45429 16.3765 4.45429 11.6618C4.45429 10.3185 4.9311 9.22133 5.72065 8.36C5.58222 8.04931 5.16694 6.79833 5.82831 5.10337C5.82831 5.10337 6.85883 4.77319 9.2121 6.36459C10.1965 6.09082 11.2424 5.95546 12.2883 5.94931C13.3342 5.95546 14.3801 6.09082 15.3644 6.36459C17.7023 4.77319 18.7328 5.10337 18.7328 5.10337C19.3942 6.79833 18.9789 8.04931 18.8559 8.36C19.6403 9.22133 20.1171 10.3185 20.1171 11.6618C20.1171 16.3888 17.2409 17.4296 14.5031 17.7321C14.9338 18.1012 15.3337 18.8559 15.3337 20.0084C15.3337 21.6552 15.3183 22.978 15.3183 23.3779C15.3183 23.7009 15.5336 24.0854 16.1642 23.9623C21.0871 22.3484 24.6094 17.7341 24.6094 12.3047C24.6094 5.50942 19.0999 0 12.3047 0Z"], ["href", "https://x.com/angular", "aria-label", "X", "target", "_blank", "rel", "noopener"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", "alt", "X"], ["d", "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"], ["href", "https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw", "aria-label", "Youtube", "target", "_blank", "rel", "noopener"], ["width", "29", "height", "20", "viewBox", "0 0 29 20", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", "alt", "Youtube"], ["fill-rule", "evenodd", "clip-rule", "evenodd", "d", "M27.4896 1.52422C27.9301 1.96749 28.2463 2.51866 28.4068 3.12258C29.0004 5.35161 29.0004 10 29.0004 10C29.0004 10 29.0004 14.6484 28.4068 16.8774C28.2463 17.4813 27.9301 18.0325 27.4896 18.4758C27.0492 18.9191 26.5 19.2389 25.8972 19.4032C23.6778 20 14.8068 20 14.8068 20C14.8068 20 5.93586 20 3.71651 19.4032C3.11363 19.2389 2.56449 18.9191 2.12405 18.4758C1.68361 18.0325 1.36732 17.4813 1.20683 16.8774C0.613281 14.6484 0.613281 10 0.613281 10C0.613281 10 0.613281 5.35161 1.20683 3.12258C1.36732 2.51866 1.68361 1.96749 2.12405 1.52422C2.56449 1.08095 3.11363 0.76113 3.71651 0.596774C5.93586 0 14.8068 0 14.8068 0C14.8068 0 23.6778 0 25.8972 0.596774C26.5 0.76113 27.0492 1.08095 27.4896 1.52422ZM19.3229 10L11.9036 5.77905V14.221L19.3229 10Z"], ["xmlns", "http://www.w3.org/2000/svg", "height", "14", "viewBox", "0 -960 960 960", "width", "14", "fill", "currentColor"], ["d", "M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"]], template: function App_Template(rf, ctx) {
+  static \u0275cmp = /* @__PURE__ */ \u0275\u0275defineComponent({ type: _App, selectors: [["app-root"]], decls: 1, vars: 0, template: function App_Template(rf, ctx) {
     if (rf & 1) {
-      \u0275\u0275elementStart(0, "main", 0)(1, "div", 1)(2, "div", 2);
-      \u0275\u0275namespaceSVG();
-      \u0275\u0275elementStart(3, "svg", 3)(4, "g", 4);
-      \u0275\u0275element(5, "path", 5)(6, "path", 6);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(7, "defs")(8, "radialGradient", 7);
-      \u0275\u0275element(9, "stop", 8)(10, "stop", 9)(11, "stop", 10);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(12, "linearGradient", 11);
-      \u0275\u0275element(13, "stop", 12)(14, "stop", 13)(15, "stop", 14)(16, "stop", 15);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(17, "clipPath", 16);
-      \u0275\u0275element(18, "path", 17);
-      \u0275\u0275elementEnd()()();
-      \u0275\u0275namespaceHTML();
-      \u0275\u0275elementStart(19, "h1");
-      \u0275\u0275text(20);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(21, "p");
-      \u0275\u0275text(22, "Congratulations! Your app is running. \u{1F389}");
-      \u0275\u0275elementEnd()();
-      \u0275\u0275element(23, "div", 18);
-      \u0275\u0275elementStart(24, "div", 19)(25, "div", 20);
-      \u0275\u0275repeaterCreate(26, App_For_27_Template, 5, 2, "a", 21, _forTrack02);
-      \u0275\u0275elementEnd();
-      \u0275\u0275elementStart(28, "div", 22)(29, "a", 23);
-      \u0275\u0275namespaceSVG();
-      \u0275\u0275elementStart(30, "svg", 24);
-      \u0275\u0275element(31, "path", 25);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275namespaceHTML();
-      \u0275\u0275elementStart(32, "a", 26);
-      \u0275\u0275namespaceSVG();
-      \u0275\u0275elementStart(33, "svg", 27);
-      \u0275\u0275element(34, "path", 28);
-      \u0275\u0275elementEnd()();
-      \u0275\u0275namespaceHTML();
-      \u0275\u0275elementStart(35, "a", 29);
-      \u0275\u0275namespaceSVG();
-      \u0275\u0275elementStart(36, "svg", 30);
-      \u0275\u0275element(37, "path", 31);
-      \u0275\u0275elementEnd()()()()()();
-      \u0275\u0275namespaceHTML();
-      \u0275\u0275element(38, "router-outlet");
+      \u0275\u0275element(0, "router-outlet");
     }
-    if (rf & 2) {
-      \u0275\u0275advance(20);
-      \u0275\u0275textInterpolate1("Hello, ", ctx.title());
-      \u0275\u0275advance(6);
-      \u0275\u0275repeater(\u0275\u0275pureFunction6(7, _c62, \u0275\u0275pureFunction0(1, _c011), \u0275\u0275pureFunction0(2, _c17), \u0275\u0275pureFunction0(3, _c24), \u0275\u0275pureFunction0(4, _c33), \u0275\u0275pureFunction0(5, _c43), \u0275\u0275pureFunction0(6, _c52)));
-    }
-  }, dependencies: [RouterOutlet], styles: ['\n[_nghost-%COMP%] {\n  --%NS%bright-blue: oklch(51.01% 0.274 263.83);\n  --%NS%electric-violet: oklch(53.18% 0.28 296.97);\n  --%NS%french-violet: oklch(47.66% 0.246 305.88);\n  --%NS%vivid-pink: oklch(69.02% 0.277 332.77);\n  --%NS%hot-red: oklch(61.42% 0.238 15.34);\n  --%NS%orange-red: oklch(63.32% 0.24 31.68);\n  --%NS%gray-900: oklch(19.37% 0.006 300.98);\n  --%NS%gray-700: oklch(36.98% 0.014 302.71);\n  --%NS%gray-400: oklch(70.9% 0.015 304.04);\n  --%NS%red-to-pink-to-purple-vertical-gradient:\n    linear-gradient(\n      \n      180deg,\n      var(--%NS%orange-red) 0%,\n      var(--%NS%vivid-pink) 50%,\n      var(--%NS%electric-violet) 100% );\n  --%NS%red-to-pink-to-purple-horizontal-gradient:\n    linear-gradient(\n      \n      90deg,\n      var(--%NS%orange-red) 0%,\n      var(--%NS%vivid-pink) 50%,\n      var(--%NS%electric-violet) 100% );\n  --%NS%pill-accent: var(--%NS%bright-blue);\n  font-family:\n    "Inter",\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif,\n    "Apple Color Emoji",\n    "Segoe UI Emoji",\n    "Segoe UI Symbol";\n  box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  display: block;\n  height: 100dvh;\n}\nh1[_ngcontent-%COMP%] {\n  font-size: 3.125rem;\n  color: var(--%NS%gray-900);\n  font-weight: 500;\n  line-height: 100%;\n  letter-spacing: -0.125rem;\n  margin: 0;\n  font-family:\n    "Inter Tight",\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif,\n    "Apple Color Emoji",\n    "Segoe UI Emoji",\n    "Segoe UI Symbol";\n}\np[_ngcontent-%COMP%] {\n  margin: 0;\n  color: var(--%NS%gray-700);\n}\nmain[_ngcontent-%COMP%] {\n  width: 100%;\n  min-height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 1rem;\n  box-sizing: inherit;\n  position: relative;\n}\n.angular-logo[_ngcontent-%COMP%] {\n  max-width: 9.2rem;\n}\n.content[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: space-around;\n  width: 100%;\n  max-width: 700px;\n  margin-bottom: 3rem;\n}\n.content[_ngcontent-%COMP%]   h1[_ngcontent-%COMP%] {\n  margin-top: 1.75rem;\n}\n.content[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  margin-top: 1.5rem;\n}\n.divider[_ngcontent-%COMP%] {\n  width: 1px;\n  background: var(--%NS%red-to-pink-to-purple-vertical-gradient);\n  margin-inline: 0.5rem;\n}\n.pill-group[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n  align-items: start;\n  flex-wrap: wrap;\n  gap: 1.25rem;\n}\n.pill[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  --%NS%pill-accent: var(--%NS%bright-blue);\n  background: color-mix(in srgb, var(--%NS%pill-accent) 5%, transparent);\n  color: var(--%NS%pill-accent);\n  padding-inline: 0.75rem;\n  padding-block: 0.375rem;\n  border-radius: 2.75rem;\n  border: 0;\n  transition: background 0.3s ease;\n  font-family: var(--%NS%inter-font);\n  font-size: 0.875rem;\n  font-style: normal;\n  font-weight: 500;\n  line-height: 1.4rem;\n  letter-spacing: -0.00875rem;\n  text-decoration: none;\n  white-space: nowrap;\n}\n.pill[_ngcontent-%COMP%]:hover {\n  background: color-mix(in srgb, var(--%NS%pill-accent) 15%, transparent);\n}\n.pill-group[_ngcontent-%COMP%]   .pill[_ngcontent-%COMP%]:nth-child(6n+1) {\n  --%NS%pill-accent: var(--%NS%bright-blue);\n}\n.pill-group[_ngcontent-%COMP%]   .pill[_ngcontent-%COMP%]:nth-child(6n+2) {\n  --%NS%pill-accent: var(--%NS%electric-violet);\n}\n.pill-group[_ngcontent-%COMP%]   .pill[_ngcontent-%COMP%]:nth-child(6n+3) {\n  --%NS%pill-accent: var(--%NS%french-violet);\n}\n.pill-group[_ngcontent-%COMP%]   .pill[_ngcontent-%COMP%]:nth-child(6n+4), \n.pill-group[_ngcontent-%COMP%]   .pill[_ngcontent-%COMP%]:nth-child(6n+5), \n.pill-group[_ngcontent-%COMP%]   .pill[_ngcontent-%COMP%]:nth-child(6n+6) {\n  --%NS%pill-accent: var(--%NS%hot-red);\n}\n.pill-group[_ngcontent-%COMP%]   svg[_ngcontent-%COMP%] {\n  margin-inline-start: 0.25rem;\n}\n.social-links[_ngcontent-%COMP%] {\n  display: flex;\n  align-items: center;\n  gap: 0.73rem;\n  margin-top: 1.5rem;\n}\n.social-links[_ngcontent-%COMP%]   path[_ngcontent-%COMP%] {\n  transition: fill 0.3s ease;\n  fill: var(--%NS%gray-400);\n}\n.social-links[_ngcontent-%COMP%]   a[_ngcontent-%COMP%]:hover   svg[_ngcontent-%COMP%]   path[_ngcontent-%COMP%] {\n  fill: var(--%NS%gray-900);\n}\n@media screen and (max-width: 650px) {\n  .content[_ngcontent-%COMP%] {\n    flex-direction: column;\n    width: max-content;\n  }\n  .divider[_ngcontent-%COMP%] {\n    height: 1px;\n    width: 100%;\n    background: var(--%NS%red-to-pink-to-purple-horizontal-gradient);\n    margin-block: 1.5rem;\n  }\n}\n/*# sourceMappingURL=app.css.map */'] });
+  }, dependencies: [RouterOutlet], encapsulation: 2 });
 };
 (() => {
   (typeof ngDevMode === "undefined" || ngDevMode) && setClassMetadata(App, [{
     type: Component,
-    args: [{ selector: "app-root", imports: [RouterOutlet], template: `<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * * The content below * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * Delete the template below * * * * * * * * * -->\r
-<!-- * * * * * * * to get started with your project! * * * * * * * -->\r
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r
-\r
-<style>\r
-  :host {\r
-    --bright-blue: oklch(51.01% 0.274 263.83);\r
-    --electric-violet: oklch(53.18% 0.28 296.97);\r
-    --french-violet: oklch(47.66% 0.246 305.88);\r
-    --vivid-pink: oklch(69.02% 0.277 332.77);\r
-    --hot-red: oklch(61.42% 0.238 15.34);\r
-    --orange-red: oklch(63.32% 0.24 31.68);\r
-\r
-    --gray-900: oklch(19.37% 0.006 300.98);\r
-    --gray-700: oklch(36.98% 0.014 302.71);\r
-    --gray-400: oklch(70.9% 0.015 304.04);\r
-\r
-    --red-to-pink-to-purple-vertical-gradient: linear-gradient(\r
-      180deg,\r
-      var(--orange-red) 0%,\r
-      var(--vivid-pink) 50%,\r
-      var(--electric-violet) 100%\r
-    );\r
-\r
-    --red-to-pink-to-purple-horizontal-gradient: linear-gradient(\r
-      90deg,\r
-      var(--orange-red) 0%,\r
-      var(--vivid-pink) 50%,\r
-      var(--electric-violet) 100%\r
-    );\r
-\r
-    --pill-accent: var(--bright-blue);\r
-\r
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,\r
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",\r
-      "Segoe UI Symbol";\r
-    box-sizing: border-box;\r
-    -webkit-font-smoothing: antialiased;\r
-    -moz-osx-font-smoothing: grayscale;\r
-    display: block;\r
-    height: 100dvh;\r
-  }\r
-\r
-  h1 {\r
-    font-size: 3.125rem;\r
-    color: var(--gray-900);\r
-    font-weight: 500;\r
-    line-height: 100%;\r
-    letter-spacing: -0.125rem;\r
-    margin: 0;\r
-    font-family: "Inter Tight", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,\r
-      Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji",\r
-      "Segoe UI Symbol";\r
-  }\r
-\r
-  p {\r
-    margin: 0;\r
-    color: var(--gray-700);\r
-  }\r
-\r
-  main {\r
-    width: 100%;\r
-    min-height: 100%;\r
-    display: flex;\r
-    justify-content: center;\r
-    align-items: center;\r
-    padding: 1rem;\r
-    box-sizing: inherit;\r
-    position: relative;\r
-  }\r
-\r
-  .angular-logo {\r
-    max-width: 9.2rem;\r
-  }\r
-\r
-  .content {\r
-    display: flex;\r
-    justify-content: space-around;\r
-    width: 100%;\r
-    max-width: 700px;\r
-    margin-bottom: 3rem;\r
-  }\r
-\r
-  .content h1 {\r
-    margin-top: 1.75rem;\r
-  }\r
-\r
-  .content p {\r
-    margin-top: 1.5rem;\r
-  }\r
-\r
-  .divider {\r
-    width: 1px;\r
-    background: var(--red-to-pink-to-purple-vertical-gradient);\r
-    margin-inline: 0.5rem;\r
-  }\r
-\r
-  .pill-group {\r
-    display: flex;\r
-    flex-direction: column;\r
-    align-items: start;\r
-    flex-wrap: wrap;\r
-    gap: 1.25rem;\r
-  }\r
-\r
-  .pill {\r
-    display: flex;\r
-    align-items: center;\r
-    --pill-accent: var(--bright-blue);\r
-    background: color-mix(in srgb, var(--pill-accent) 5%, transparent);\r
-    color: var(--pill-accent);\r
-    padding-inline: 0.75rem;\r
-    padding-block: 0.375rem;\r
-    border-radius: 2.75rem;\r
-    border: 0;\r
-    transition: background 0.3s ease;\r
-    font-family: var(--inter-font);\r
-    font-size: 0.875rem;\r
-    font-style: normal;\r
-    font-weight: 500;\r
-    line-height: 1.4rem;\r
-    letter-spacing: -0.00875rem;\r
-    text-decoration: none;\r
-    white-space: nowrap;\r
-  }\r
-\r
-  .pill:hover {\r
-    background: color-mix(in srgb, var(--pill-accent) 15%, transparent);\r
-  }\r
-\r
-  .pill-group .pill:nth-child(6n + 1) {\r
-    --pill-accent: var(--bright-blue);\r
-  }\r
-  .pill-group .pill:nth-child(6n + 2) {\r
-    --pill-accent: var(--electric-violet);\r
-  }\r
-  .pill-group .pill:nth-child(6n + 3) {\r
-    --pill-accent: var(--french-violet);\r
-  }\r
-\r
-  .pill-group .pill:nth-child(6n + 4),\r
-  .pill-group .pill:nth-child(6n + 5),\r
-  .pill-group .pill:nth-child(6n + 6) {\r
-    --pill-accent: var(--hot-red);\r
-  }\r
-\r
-  .pill-group svg {\r
-    margin-inline-start: 0.25rem;\r
-  }\r
-\r
-  .social-links {\r
-    display: flex;\r
-    align-items: center;\r
-    gap: 0.73rem;\r
-    margin-top: 1.5rem;\r
-  }\r
-\r
-  .social-links path {\r
-    transition: fill 0.3s ease;\r
-    fill: var(--gray-400);\r
-  }\r
-\r
-  .social-links a:hover svg path {\r
-    fill: var(--gray-900);\r
-  }\r
-\r
-  @media screen and (max-width: 650px) {\r
-    .content {\r
-      flex-direction: column;\r
-      width: max-content;\r
-    }\r
-\r
-    .divider {\r
-      height: 1px;\r
-      width: 100%;\r
-      background: var(--red-to-pink-to-purple-horizontal-gradient);\r
-      margin-block: 1.5rem;\r
-    }\r
-  }\r
-</style>\r
-\r
-<main class="main">\r
-  <div class="content">\r
-    <div class="left-side">\r
-      <svg\r
-        xmlns="http://www.w3.org/2000/svg"\r
-        viewBox="0 0 982 239"\r
-        fill="none"\r
-        class="angular-logo"\r
-      >\r
-        <g clip-path="url(#a)">\r
-          <path\r
-            fill="url(#b)"\r
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"\r
-          />\r
-          <path\r
-            fill="url(#c)"\r
-            d="M388.676 191.625h30.849L363.31 31.828h-35.758l-56.215 159.797h30.848l13.174-39.356h60.061l13.256 39.356Zm-65.461-62.675 21.602-64.311h1.227l21.602 64.311h-44.431Zm126.831-7.527v70.202h-28.23V71.839h27.002v20.374h1.392c2.782-6.71 7.2-12.028 13.255-15.956 6.056-3.927 13.584-5.89 22.503-5.89 8.264 0 15.465 1.8 21.684 5.318 6.137 3.518 10.964 8.673 14.319 15.382 3.437 6.71 5.074 14.81 4.992 24.383v76.175h-28.23v-71.92c0-8.019-2.046-14.237-6.219-18.819-4.173-4.5-9.819-6.791-17.102-6.791-4.91 0-9.328 1.063-13.174 3.272-3.846 2.128-6.792 5.237-9.001 9.328-2.046 4.009-3.191 8.918-3.191 14.728ZM589.233 239c-10.147 0-18.82-1.391-26.103-4.091-7.282-2.7-13.092-6.382-17.511-10.964-4.418-4.582-7.528-9.655-9.164-15.219l25.448-6.136c1.145 2.372 2.782 4.663 4.991 6.954 2.209 2.291 5.155 4.255 8.837 5.81 3.683 1.554 8.428 2.291 14.074 2.291 8.019 0 14.647-1.964 19.884-5.81 5.237-3.845 7.856-10.227 7.856-19.064v-22.665h-1.391c-1.473 2.946-3.601 5.892-6.383 9.001-2.782 3.109-6.464 5.645-10.965 7.691-4.582 2.046-10.228 3.109-17.101 3.109-9.165 0-17.511-2.209-25.039-6.545-7.446-4.337-13.42-10.883-17.757-19.474-4.418-8.673-6.628-19.473-6.628-32.565 0-13.091 2.21-24.301 6.628-33.383 4.419-9.082 10.311-15.955 17.839-20.7 7.528-4.746 15.874-7.037 25.039-7.037 7.037 0 12.846 1.145 17.347 3.518 4.582 2.373 8.182 5.236 10.883 8.51 2.7 3.272 4.746 6.382 6.137 9.327h1.554v-19.8h27.821v121.749c0 10.228-2.454 18.737-7.364 25.447-4.91 6.709-11.538 11.7-20.048 15.055-8.509 3.355-18.165 4.991-28.884 4.991Zm.245-71.266c5.974 0 11.047-1.473 15.302-4.337 4.173-2.945 7.446-7.118 9.573-12.519 2.21-5.482 3.274-12.027 3.274-19.637 0-7.609-1.064-14.155-3.274-19.8-2.127-5.646-5.318-10.064-9.491-13.255-4.174-3.11-9.329-4.746-15.384-4.746s-11.537 1.636-15.792 4.91c-4.173 3.272-7.365 7.772-9.492 13.418-2.128 5.727-3.191 12.191-3.191 19.392 0 7.2 1.063 13.745 3.273 19.228 2.127 5.482 5.318 9.736 9.573 12.764 4.174 3.027 9.41 4.582 15.629 4.582Zm141.56-26.51V71.839h28.23v119.786h-27.412v-21.273h-1.227c-2.7 6.709-7.119 12.191-13.338 16.446-6.137 4.255-13.747 6.382-22.748 6.382-7.855 0-14.81-1.718-20.783-5.237-5.974-3.518-10.72-8.591-14.075-15.382-3.355-6.709-5.073-14.891-5.073-24.464V71.839h28.312v71.921c0 7.609 2.046 13.664 6.219 18.083 4.173 4.5 9.655 6.709 16.365 6.709 4.173 0 8.183-.982 12.111-3.028 3.927-2.045 7.118-5.072 9.655-9.082 2.537-4.091 3.764-9.164 3.764-15.218Zm65.707-109.395v159.796h-28.23V31.828h28.23Zm44.841 162.169c-7.61 0-14.402-1.391-20.457-4.091-6.055-2.7-10.883-6.791-14.32-12.109-3.518-5.319-5.237-11.946-5.237-19.801 0-6.791 1.228-12.355 3.765-16.773 2.536-4.419 5.891-7.937 10.228-10.637 4.337-2.618 9.164-4.664 14.647-6.055 5.4-1.391 11.046-2.373 16.856-3.027 7.037-.737 12.683-1.391 17.102-1.964 4.337-.573 7.528-1.555 9.574-2.782 1.963-1.309 3.027-3.273 3.027-5.973v-.491c0-5.891-1.718-10.391-5.237-13.664-3.518-3.191-8.51-4.828-15.056-4.828-6.955 0-12.356 1.473-16.447 4.5-4.009 3.028-6.71 6.546-8.183 10.719l-26.348-3.764c2.046-7.282 5.483-13.336 10.31-18.328 4.746-4.909 10.638-8.59 17.511-11.045 6.955-2.455 14.565-3.682 22.912-3.682 5.809 0 11.537.654 17.265 2.045s10.965 3.6 15.711 6.71c4.746 3.109 8.51 7.282 11.455 12.6 2.864 5.318 4.337 11.946 4.337 19.883v80.184h-27.166v-16.446h-.9c-1.719 3.355-4.092 6.464-7.201 9.328-3.109 2.864-6.955 5.237-11.619 6.955-4.828 1.718-10.229 2.536-16.529 2.536Zm7.364-20.701c5.646 0 10.556-1.145 14.729-3.354 4.173-2.291 7.364-5.237 9.655-9.001 2.292-3.763 3.355-7.854 3.355-12.273v-14.155c-.9.737-2.373 1.391-4.5 2.046-2.128.654-4.419 1.145-7.037 1.636-2.619.491-5.155.9-7.692 1.227-2.537.328-4.746.655-6.628.901-4.173.572-8.019 1.472-11.292 2.781-3.355 1.31-5.973 3.11-7.855 5.401-1.964 2.291-2.864 5.318-2.864 8.918 0 5.237 1.882 9.164 5.728 11.782 3.682 2.782 8.51 4.091 14.401 4.091Zm64.643 18.328V71.839h27.412v19.965h1.227c2.21-6.955 5.974-12.274 11.292-16.038 5.319-3.763 11.456-5.645 18.329-5.645 1.555 0 3.355.082 5.237.163 1.964.164 3.601.328 4.91.573v25.938c-1.227-.41-3.109-.819-5.646-1.146a58.814 58.814 0 0 0-7.446-.49c-5.155 0-9.738 1.145-13.829 3.354-4.091 2.209-7.282 5.236-9.655 9.164-2.373 3.927-3.519 8.427-3.519 13.5v70.448h-28.312ZM222.077 39.192l-8.019 125.923L137.387 0l84.69 39.192Zm-53.105 162.825-57.933 33.056-57.934-33.056 11.783-28.556h92.301l11.783 28.556ZM111.039 62.675l30.357 73.803H80.681l30.358-73.803ZM7.937 165.115 0 39.192 84.69 0 7.937 165.115Z"\r
-          />\r
-        </g>\r
-        <defs>\r
-          <radialGradient\r
-            id="c"\r
-            cx="0"\r
-            cy="0"\r
-            r="1"\r
-            gradientTransform="rotate(118.122 171.182 60.81) scale(205.794)"\r
-            gradientUnits="userSpaceOnUse"\r
-          >\r
-            <stop stop-color="#FF41F8" />\r
-            <stop offset=".707" stop-color="#FF41F8" stop-opacity=".5" />\r
-            <stop offset="1" stop-color="#FF41F8" stop-opacity="0" />\r
-          </radialGradient>\r
-          <linearGradient\r
-            id="b"\r
-            x1="0"\r
-            x2="982"\r
-            y1="192"\r
-            y2="192"\r
-            gradientUnits="userSpaceOnUse"\r
-          >\r
-            <stop stop-color="#F0060B" />\r
-            <stop offset="0" stop-color="#F0070C" />\r
-            <stop offset=".526" stop-color="#CC26D5" />\r
-            <stop offset="1" stop-color="#7702FF" />\r
-          </linearGradient>\r
-          <clipPath id="a"><path fill="#fff" d="M0 0h982v239H0z" /></clipPath>\r
-        </defs>\r
-      </svg>\r
-      <h1>Hello, {{ title() }}</h1>\r
-      <p>Congratulations! Your app is running. \u{1F389}</p>\r
-    </div>\r
-    <div class="divider" role="separator" aria-label="Divider"></div>\r
-    <div class="right-side">\r
-      <div class="pill-group">\r
-        @for (item of [\r
-          { title: 'Explore the Docs', link: 'https://angular.dev' },\r
-          { title: 'Learn with Tutorials', link: 'https://angular.dev/tutorials' },\r
-          { title: 'Prompt and best practices for AI', link: 'https://angular.dev/ai/develop-with-ai'},\r
-          { title: 'CLI Docs', link: 'https://angular.dev/tools/cli' },\r
-          { title: 'Angular Language Service', link: 'https://angular.dev/tools/language-service' },\r
-          { title: 'Angular DevTools', link: 'https://angular.dev/tools/devtools' },\r
-        ]; track item.title) {\r
-          <a\r
-            class="pill"\r
-            [href]="item.link"\r
-            target="_blank"\r
-            rel="noopener"\r
-          >\r
-            <span>{{ item.title }}</span>\r
-            <svg\r
-              xmlns="http://www.w3.org/2000/svg"\r
-              height="14"\r
-              viewBox="0 -960 960 960"\r
-              width="14"\r
-              fill="currentColor"\r
-            >\r
-              <path\r
-                d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h560v-280h80v280q0 33-23.5 56.5T760-120H200Zm188-212-56-56 372-372H560v-80h280v280h-80v-144L388-332Z"\r
-              />\r
-            </svg>\r
-          </a>\r
-        }\r
-      </div>\r
-      <div class="social-links">\r
-        <a\r
-          href="https://github.com/angular/angular"\r
-          aria-label="Github"\r
-          target="_blank"\r
-          rel="noopener"\r
-        >\r
-          <svg\r
-            width="25"\r
-            height="24"\r
-            viewBox="0 0 25 24"\r
-            fill="none"\r
-            xmlns="http://www.w3.org/2000/svg"\r
-            alt="Github"\r
-          >\r
-            <path\r
-              d="M12.3047 0C5.50634 0 0 5.50942 0 12.3047C0 17.7423 3.52529 22.3535 8.41332 23.9787C9.02856 24.0946 9.25414 23.7142 9.25414 23.3871C9.25414 23.0949 9.24389 22.3207 9.23876 21.2953C5.81601 22.0377 5.09414 19.6444 5.09414 19.6444C4.53427 18.2243 3.72524 17.8449 3.72524 17.8449C2.61064 17.082 3.81137 17.0973 3.81137 17.0973C5.04697 17.1835 5.69604 18.3647 5.69604 18.3647C6.79321 20.2463 8.57636 19.7029 9.27978 19.3881C9.39052 18.5924 9.70736 18.0499 10.0591 17.7423C7.32641 17.4347 4.45429 16.3765 4.45429 11.6618C4.45429 10.3185 4.9311 9.22133 5.72065 8.36C5.58222 8.04931 5.16694 6.79833 5.82831 5.10337C5.82831 5.10337 6.85883 4.77319 9.2121 6.36459C10.1965 6.09082 11.2424 5.95546 12.2883 5.94931C13.3342 5.95546 14.3801 6.09082 15.3644 6.36459C17.7023 4.77319 18.7328 5.10337 18.7328 5.10337C19.3942 6.79833 18.9789 8.04931 18.8559 8.36C19.6403 9.22133 20.1171 10.3185 20.1171 11.6618C20.1171 16.3888 17.2409 17.4296 14.5031 17.7321C14.9338 18.1012 15.3337 18.8559 15.3337 20.0084C15.3337 21.6552 15.3183 22.978 15.3183 23.3779C15.3183 23.7009 15.5336 24.0854 16.1642 23.9623C21.0871 22.3484 24.6094 17.7341 24.6094 12.3047C24.6094 5.50942 19.0999 0 12.3047 0Z"\r
-            />\r
-          </svg>\r
-        </a>\r
-        <a\r
-          href="https://x.com/angular"\r
-          aria-label="X"\r
-          target="_blank"\r
-          rel="noopener"\r
-        >\r
-          <svg\r
-            width="24"\r
-            height="24"\r
-            viewBox="0 0 24 24"\r
-            fill="none"\r
-            xmlns="http://www.w3.org/2000/svg"\r
-            alt="X"\r
-          >\r
-            <path\r
-              d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"\r
-            />\r
-          </svg>\r
-        </a>\r
-        <a\r
-          href="https://www.youtube.com/channel/UCbn1OgGei-DV7aSRo_HaAiw"\r
-          aria-label="Youtube"\r
-          target="_blank"\r
-          rel="noopener"\r
-        >\r
-          <svg\r
-            width="29"\r
-            height="20"\r
-            viewBox="0 0 29 20"\r
-            fill="none"\r
-            xmlns="http://www.w3.org/2000/svg"\r
-            alt="Youtube"\r
-          >\r
-            <path\r
-              fill-rule="evenodd"\r
-              clip-rule="evenodd"\r
-              d="M27.4896 1.52422C27.9301 1.96749 28.2463 2.51866 28.4068 3.12258C29.0004 5.35161 29.0004 10 29.0004 10C29.0004 10 29.0004 14.6484 28.4068 16.8774C28.2463 17.4813 27.9301 18.0325 27.4896 18.4758C27.0492 18.9191 26.5 19.2389 25.8972 19.4032C23.6778 20 14.8068 20 14.8068 20C14.8068 20 5.93586 20 3.71651 19.4032C3.11363 19.2389 2.56449 18.9191 2.12405 18.4758C1.68361 18.0325 1.36732 17.4813 1.20683 16.8774C0.613281 14.6484 0.613281 10 0.613281 10C0.613281 10 0.613281 5.35161 1.20683 3.12258C1.36732 2.51866 1.68361 1.96749 2.12405 1.52422C2.56449 1.08095 3.11363 0.76113 3.71651 0.596774C5.93586 0 14.8068 0 14.8068 0C14.8068 0 23.6778 0 25.8972 0.596774C26.5 0.76113 27.0492 1.08095 27.4896 1.52422ZM19.3229 10L11.9036 5.77905V14.221L19.3229 10Z"\r
-            />\r
-          </svg>\r
-        </a>\r
-      </div>\r
-    </div>\r
-  </div>\r
-</main>\r
-\r
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * * The content above * * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * is only a placeholder * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * and can be replaced.  * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * End of Placeholder  * * * * * * * * * * * * -->\r
-<!-- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * -->\r
-\r
-\r
-<router-outlet />\r
-`, styles: ['/* angular:styles/component:css;8cd0a3b0f293ea38c3aaf78843c435173fccc589957171eb75a39e17a6242e9d;C:\\Users\\hossein\\Desktop\\Projects\\GitHubRepositories\\User_Profile\\AngApp\\src\\app\\app.html */\n:host {\n  --bright-blue: oklch(51.01% 0.274 263.83);\n  --electric-violet: oklch(53.18% 0.28 296.97);\n  --french-violet: oklch(47.66% 0.246 305.88);\n  --vivid-pink: oklch(69.02% 0.277 332.77);\n  --hot-red: oklch(61.42% 0.238 15.34);\n  --orange-red: oklch(63.32% 0.24 31.68);\n  --gray-900: oklch(19.37% 0.006 300.98);\n  --gray-700: oklch(36.98% 0.014 302.71);\n  --gray-400: oklch(70.9% 0.015 304.04);\n  --red-to-pink-to-purple-vertical-gradient:\n    linear-gradient(\n      \n      180deg,\n      var(--orange-red) 0%,\n      var(--vivid-pink) 50%,\n      var(--electric-violet) 100% );\n  --red-to-pink-to-purple-horizontal-gradient:\n    linear-gradient(\n      \n      90deg,\n      var(--orange-red) 0%,\n      var(--vivid-pink) 50%,\n      var(--electric-violet) 100% );\n  --pill-accent: var(--bright-blue);\n  font-family:\n    "Inter",\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif,\n    "Apple Color Emoji",\n    "Segoe UI Emoji",\n    "Segoe UI Symbol";\n  box-sizing: border-box;\n  -webkit-font-smoothing: antialiased;\n  -moz-osx-font-smoothing: grayscale;\n  display: block;\n  height: 100dvh;\n}\nh1 {\n  font-size: 3.125rem;\n  color: var(--gray-900);\n  font-weight: 500;\n  line-height: 100%;\n  letter-spacing: -0.125rem;\n  margin: 0;\n  font-family:\n    "Inter Tight",\n    -apple-system,\n    BlinkMacSystemFont,\n    "Segoe UI",\n    Roboto,\n    Helvetica,\n    Arial,\n    sans-serif,\n    "Apple Color Emoji",\n    "Segoe UI Emoji",\n    "Segoe UI Symbol";\n}\np {\n  margin: 0;\n  color: var(--gray-700);\n}\nmain {\n  width: 100%;\n  min-height: 100%;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  padding: 1rem;\n  box-sizing: inherit;\n  position: relative;\n}\n.angular-logo {\n  max-width: 9.2rem;\n}\n.content {\n  display: flex;\n  justify-content: space-around;\n  width: 100%;\n  max-width: 700px;\n  margin-bottom: 3rem;\n}\n.content h1 {\n  margin-top: 1.75rem;\n}\n.content p {\n  margin-top: 1.5rem;\n}\n.divider {\n  width: 1px;\n  background: var(--red-to-pink-to-purple-vertical-gradient);\n  margin-inline: 0.5rem;\n}\n.pill-group {\n  display: flex;\n  flex-direction: column;\n  align-items: start;\n  flex-wrap: wrap;\n  gap: 1.25rem;\n}\n.pill {\n  display: flex;\n  align-items: center;\n  --pill-accent: var(--bright-blue);\n  background: color-mix(in srgb, var(--pill-accent) 5%, transparent);\n  color: var(--pill-accent);\n  padding-inline: 0.75rem;\n  padding-block: 0.375rem;\n  border-radius: 2.75rem;\n  border: 0;\n  transition: background 0.3s ease;\n  font-family: var(--inter-font);\n  font-size: 0.875rem;\n  font-style: normal;\n  font-weight: 500;\n  line-height: 1.4rem;\n  letter-spacing: -0.00875rem;\n  text-decoration: none;\n  white-space: nowrap;\n}\n.pill:hover {\n  background: color-mix(in srgb, var(--pill-accent) 15%, transparent);\n}\n.pill-group .pill:nth-child(6n+1) {\n  --pill-accent: var(--bright-blue);\n}\n.pill-group .pill:nth-child(6n+2) {\n  --pill-accent: var(--electric-violet);\n}\n.pill-group .pill:nth-child(6n+3) {\n  --pill-accent: var(--french-violet);\n}\n.pill-group .pill:nth-child(6n+4),\n.pill-group .pill:nth-child(6n+5),\n.pill-group .pill:nth-child(6n+6) {\n  --pill-accent: var(--hot-red);\n}\n.pill-group svg {\n  margin-inline-start: 0.25rem;\n}\n.social-links {\n  display: flex;\n  align-items: center;\n  gap: 0.73rem;\n  margin-top: 1.5rem;\n}\n.social-links path {\n  transition: fill 0.3s ease;\n  fill: var(--gray-400);\n}\n.social-links a:hover svg path {\n  fill: var(--gray-900);\n}\n@media screen and (max-width: 650px) {\n  .content {\n    flex-direction: column;\n    width: max-content;\n  }\n  .divider {\n    height: 1px;\n    width: 100%;\n    background: var(--red-to-pink-to-purple-horizontal-gradient);\n    margin-block: 1.5rem;\n  }\n}\n/*# sourceMappingURL=app.css.map */\n'] }]
+    args: [{ selector: "app-root", imports: [RouterOutlet], template: "<router-outlet />" }]
   }], null, null);
 })();
 (() => {
-  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(App, { className: "App", filePath: "src/app/app.ts", lineNumber: 10 });
+  (typeof ngDevMode === "undefined" || ngDevMode) && \u0275setClassDebugInfo(App, { className: "App", filePath: "src/app/app.ts", lineNumber: 13 });
 })();
 
 // src/main.ts
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
-//# debugId=1019820c-d523-54a9-a57d-f991f89c4da6
+//# debugId=e33a7f38-c00d-5236-b93c-88fe756da9c8
 //# sourceMappingURL=main.js.map
