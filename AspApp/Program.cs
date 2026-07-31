@@ -107,6 +107,21 @@ public class Program
 
 
 
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowSpecificOrigin", policy =>
+                {
+                    policy.WithOrigins("https://localhost:5443", "https://localhost:5444")
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+                });
+            });
+        }
+
+
+
         var app = builder.Build();
 
 

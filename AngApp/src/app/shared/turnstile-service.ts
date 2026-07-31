@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { afterRenderEffect, effect, inject, Service, signal, WritableSignal } from '@angular/core';
 import { SingletonService } from './singleton-service';
 import { FieldTree } from '@angular/forms/signals';
-import { LoginModel } from '../login/login';
+//import { LoginModel } from '../login/login';
 import { WindowService } from './window-service';
 
 declare const turnstile:any;
@@ -36,7 +36,7 @@ export class TurnstileService {
         });
     }
 
-    loadWidget(loginForm:FieldTree<LoginModel>, errorMessageSignal:WritableSignal<string>){
+    loadWidget(loginForm:FieldTree<{CfTurnstileResponse: string,}>, errorMessageSignal:WritableSignal<string>){
         this.widgetId.set(
             turnstile.render("#widget-container", {
             sitekey: this.turnstileSiteKey,

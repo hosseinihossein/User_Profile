@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["src/app/shared/dialogs/file-input-dialog/file-input-dialog.css"],
+  "sourcesContent": ["mat-form-field{\r\n    width: 100%;\r\n}\r\nmat-dialog-content{\r\n    width: 400px;\r\n}\r\n.file-box{\r\n    margin: 4px auto;\r\n    width: fit-content;\r\n    padding-bottom: 48px;\r\n    position: relative;\r\n}\r\n.file-box img{\r\n    width: 150px;\r\n    height: 150px;\r\n    object-fit: contain;\r\n}\r\nbutton.selectButton{\r\n    position: absolute;\r\n    bottom: 0;\r\n    left: 50%;\r\n    transform: translateX(-50%);\r\n    width: fit-content;\r\n    text-wrap: nowrap;\r\n}\r\n\r\n/*button#fileSelectButton{\r\n    position: absolute;\r\n    bottom: 0;\r\n    left: 50%;\r\n    transform: translateX(-50%);\r\n    width: fit-content;\r\n    text-wrap: nowrap;\r\n}*/\r\n/*#file-box{\r\n    margin: 4px auto;\r\n    width: fit-content;\r\n}*/"],
+  "mappings": ";AAAA;AACI,SAAO;AACX;AACA;AACI,SAAO;AACX;AACA,CAAC;AACG,UAAQ,IAAI;AACZ,SAAO;AACP,kBAAgB;AAChB,YAAU;AACd;AACA,CANC,SAMS;AACN,SAAO;AACP,UAAQ;AACR,cAAY;AAChB;AACA,MAAM,CAAC;AACH,YAAU;AACV,UAAQ;AACR,QAAM;AACN,aAAW,WAAW;AACtB,SAAO;AACP,aAAW;AACf;",
+  "names": []
+}
