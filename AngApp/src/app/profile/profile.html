@@ -1,0 +1,96 @@
+@if(displayWait()){
+<app-wait-spinner></app-wait-spinner>
+}
+@else{
+<mat-card>
+    <mat-card-header>
+        <div style="float: inline-start;position: relative;">
+            @if(profileImgSrc()){
+            <img [ngSrc]="profileImgSrc()!" priority width="100" height="100" alt="user profile image"
+                id="user-profile-img">
+            }
+            @else {
+            <mat-icon style="font-size: 100px;width: 100px;height: 100px;">account_circle</mat-icon>
+            }
+            @if(editMode()){
+            <button matIconButton matTooltip="Edit image" (click)="editProfileImage()">
+                <mat-icon>edit</mat-icon>
+            </button>
+            }
+        </div>
+        <div style="float: inline-start;position: relative;">
+            <mat-card-title>
+                @if(profileModel()){
+                {{profileModel()?.username}}
+                @if(editMode()){
+                <button matIconButton matTooltip="Edit username"><mat-icon>edit</mat-icon></button>
+                }
+                }
+                @else {
+                You're Not authenticated! Please login.
+                }
+            </mat-card-title>
+            @if(profileModel()?.email &&
+            (idToken()?.sub === profileModel()?.id || profileModel()?.publicEmail)){
+            <mat-card-subtitle>
+                {{profileModel()?.email}}
+                @if(editMode()){
+                <button matIconButton matTooltip="Edit email"><mat-icon>edit</mat-icon></button>
+                }
+                @if(idToken()?.sub === profileModel()?.id){
+                @if(profileModel()?.emailConfirmed){
+                <mat-icon matTooltip="Confirmed" style="color: var(--mat-sys-on-primary-container);">verified</mat-icon>
+                }
+                @else {
+                <mat-icon matTooltip="Not Confirmed" style="color: var(--mat-sys-on-error-container);">
+                    verified_off
+                </mat-icon>
+                <button matMiniFab matTooltip="Send Verification Code">
+                    <mat-icon>mark_email_read</mat-icon>
+                </button>
+                }
+                }
+            </mat-card-subtitle>
+            }
+        </div>
+    </mat-card-header>
+    @if(profileModel()){
+    <mat-card-content>
+        <p>
+            Name: {{profileModel()?.displayName}}
+            @if(editMode()){
+            <button matIconButton matTooltip="Edit name"><mat-icon>edit</mat-icon></button>
+            }
+        </p>
+        <p>
+            {{profileModel()?.description}}
+            @if(editMode()){
+            <button matIconButton matTooltip="Edit description"><mat-icon>edit</mat-icon></button>
+            }
+        </p>
+        @if(idToken()?.sub === profileModel()?.id &&
+        profileModel()?.roles &&
+        profileModel()?.roles!.length > 0){
+        <p>Roles: {{profileModel()?.roles?.join(', ')}}</p>
+        }
+        <p>Created at: {{profileModel()?.createdAt | date}}</p>
+    </mat-card-content>
+    }
+    <mat-card-actions align="end">
+        @if(editMode()){
+        <button matButton="" (click)="editMode.set(false)">Ok</button>
+        }
+        @else {
+        @if(oidcSecurityService.authenticated().isAuthenticated){
+        <button matButton="" (click)="logout()">Logout</button>
+        @if(idToken()?.sub === profileModel()?.id){
+        <button matButton="" (click)="editMode.set(true)">Edit</button>
+        }
+        }
+        @else {
+        <button matButton="" (click)="login()">Login</button>
+        }
+        }
+    </mat-card-actions>
+</mat-card>
+}

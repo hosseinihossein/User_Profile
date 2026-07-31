@@ -1,0 +1,21 @@
+mat-card{
+    width: 50vw;
+    min-width: fit-content;
+    margin: 50px auto 0;
+    display: block;
+}
+
+img#user-profile-img{
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+mat-card-title{
+    margin: 16px;
+}
+mat-card-subtitle{
+    margin: 0 16px;
+}

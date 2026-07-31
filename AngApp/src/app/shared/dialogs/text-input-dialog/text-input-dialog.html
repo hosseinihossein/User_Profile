@@ -1,0 +1,31 @@
+<mat-dialog-content>
+    <mat-form-field appearance="fill" subscriptSizing="dynamic">
+        <mat-label>{{data.name}}</mat-label>
+        <input type="text" matInput [formField]="inputForm.myInput">
+        @if(inputForm.myInput().errors().length > 0){
+        <mat-error>
+            @for(error of inputForm.myInput().errors(); track error.kind){
+            {{error.message}}
+            }
+        </mat-error>
+        }
+    </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+    <button matButton="filled" [mat-dialog-close]="inputForm.myInput().value()" [disabled]="inputForm().invalid()">
+        Submit
+    </button>
+    <button matButton="" mat-dialog-close>
+        Cancel
+    </button>
+</mat-dialog-actions>
+
+@if(data.canDelete){
+<mat-dialog-actions align="start">
+    <button matButton="filled" mat-dialog-close="Delete"
+        style="color: var(--mat-sys-on-error-container);background-color: var(--mat-sys-error-container);">
+        Delete
+    </button>
+</mat-dialog-actions>
+}

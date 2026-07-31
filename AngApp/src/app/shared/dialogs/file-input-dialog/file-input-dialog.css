@@ -1,0 +1,38 @@
+mat-form-field{
+    width: 100%;
+}
+mat-dialog-content{
+    width: 400px;
+}
+.file-box{
+    margin: 4px auto;
+    width: fit-content;
+    padding-bottom: 48px;
+    position: relative;
+}
+.file-box img{
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+}
+button.selectButton{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+    text-wrap: nowrap;
+}
+
+/*button#fileSelectButton{
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: fit-content;
+    text-wrap: nowrap;
+}*/
+/*#file-box{
+    margin: 4px auto;
+    width: fit-content;
+}*/
