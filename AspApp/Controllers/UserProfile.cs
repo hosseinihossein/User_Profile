@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Security.Principal;
 using AspApp.Filters;
 using AspApp.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -15,7 +16,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AspApp.Controllers;
 
 [ApiController]
-[Route("User/Profile/Api/[action]")]
+[Route("[controller]/Api/[action]")]
 public class UserProfileController : ControllerBase
 {
     private readonly UserManager<Identity_UserDbModel> _userManager;
@@ -50,7 +51,7 @@ public class UserProfileController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ProfileModel()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -99,7 +100,7 @@ public class UserProfileController : ControllerBase
     public async Task<IActionResult> SubmitUserImage([FromForm] IFormFile UserImage,
     [FromServices] IWebHostEnvironment _env)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -128,7 +129,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteUserImage([FromServices] IWebHostEnvironment _env)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -159,7 +160,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditUsername([FromForm][StringLength(64)] string Username)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -187,7 +188,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditDisplayName([FromForm][StringLength(64)] string DisplayName)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -216,7 +217,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeEmail([FromForm][StringLength(128)] string NewEmail)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -235,7 +236,7 @@ public class UserProfileController : ControllerBase
     public async Task<IActionResult> ConfirmNewEmail([FromQuery][StringLength(128)] string newEmail,
     [FromQuery][StringLength(256)] string token)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -258,7 +259,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SendEmailValidationCode()
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -276,7 +277,7 @@ public class UserProfileController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ConfirmEmail([FromQuery][StringLength(256)] string token)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -299,7 +300,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> PublicEmail([FromForm] bool PublicEmail)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();
@@ -328,7 +329,7 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditDescription([FromForm][StringLength(1024)] string Description)
     {
-        var user = await _userManager.GetUserAsync(User);
+        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
         {
             return Forbid();

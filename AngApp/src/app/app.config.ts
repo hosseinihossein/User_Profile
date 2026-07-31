@@ -23,9 +23,9 @@ export const appConfig: ApplicationConfig = {
     provideAuth({
       config: {
         authority: 'https://localhost:5443',
-        redirectUrl: "https://localhost:5443",
-        postLogoutRedirectUri: "https://localhost:5443",
-        clientId: 'AngAuthorizationApp001',
+        redirectUrl: "https://localhost:5445",
+        postLogoutRedirectUri: "https://localhost:5445",
+        clientId: 'UserProfileApp',
         scope: 'openid email roles offline_access',
         responseType: 'code',
         silentRenew: true,

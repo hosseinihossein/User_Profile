@@ -51436,26 +51436,26 @@ var MatButtonModule = class _MatButtonModule {
 var ProfileService = class _ProfileService {
   httpClient = inject2(HttpClient);
   getProfileModel(id) {
-    return this.httpClient.get("/User/Profile/Api/ProfileModel");
+    return this.httpClient.get("/UserProfile/Api/ProfileModel");
   }
   getProfileImageAddress(profileModel) {
     if (profileModel?.hasImage && profileModel.id) {
-      return `/User/Profile/Api/ProfileImage?id=${profileModel.id}&v=${profileModel.imageVersion}`;
+      return `/UserProfile/Api/ProfileImage?id=${profileModel.id}&v=${profileModel.imageVersion}`;
     } else if (profileModel?.remoteImageUrl) {
       return profileModel.remoteImageUrl;
     }
     return null;
   }
   getCsrf() {
-    return this.httpClient.get("/User/Profile/Api/GetCsrf");
+    return this.httpClient.get("/UserProfile/Api/GetCsrf");
   }
   postUserImage(userImage) {
     let formData = new FormData();
     formData.append("UserImage", userImage);
-    return this.httpClient.post("/User/Profile/Api/SubmitUserImage", formData);
+    return this.httpClient.post("/UserProfile/Api/SubmitUserImage", formData);
   }
   deleteUserImage() {
-    return this.httpClient.delete("/User/Profile/Api/DeleteUserImage");
+    return this.httpClient.delete("/UserProfile/Api/DeleteUserImage");
   }
   static \u0275fac = function ProfileService_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || _ProfileService)();
@@ -70350,9 +70350,9 @@ var appConfig = {
     provideAuth({
       config: {
         authority: "https://localhost:5443",
-        redirectUrl: "https://localhost:5443",
-        postLogoutRedirectUri: "https://localhost:5443",
-        clientId: "AngAuthorizationApp001",
+        redirectUrl: "https://localhost:5445",
+        postLogoutRedirectUri: "https://localhost:5445",
+        clientId: "UserProfileApp",
         scope: "openid email roles offline_access",
         responseType: "code",
         silentRenew: true,
@@ -70415,5 +70415,5 @@ var App = class _App {
 
 // src/main.ts
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
-//# debugId=e33a7f38-c00d-5236-b93c-88fe756da9c8
+//# debugId=ec75516a-7621-5672-9104-31263a7eeaf9
 //# sourceMappingURL=main.js.map

@@ -1,11 +1,13 @@
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using AspApp.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OpenIddict.Server.AspNetCore;
+using OpenIddict.Validation.AspNetCore;
 
 namespace AspApp;
 
@@ -54,6 +56,28 @@ public class Program
 
 
 
+        //******************* Identity service *******************
+        builder.Services.AddIdentity<Identity_UserDbModel, Identity_RoleDbModel>(options =>
+        {
+            options.User.AllowedUserNameCharacters =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._";
+
+            options.User.RequireUniqueEmail = true;
+
+            options.SignIn.RequireConfirmedEmail = false;
+
+            options.Password.RequireDigit = false;
+            options.Password.RequiredLength = 5;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredUniqueChars = 1;
+        })
+        .AddEntityFrameworkStores<Identity_DbContext>()
+        .AddDefaultTokenProviders();
+
+
+
         builder.Services.AddOpenIddict()
         .AddValidation(options =>
         {
@@ -79,9 +103,9 @@ public class Program
 
         builder.Services.AddAuthentication(options =>
         {
-            options.DefaultScheme = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme;
-            options.DefaultAuthenticateScheme = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = OpenIddictServerAspNetCoreDefaults.AuthenticationScheme;
+            options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
         });
 
 
