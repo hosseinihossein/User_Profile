@@ -69355,6 +69355,7 @@ var Profile = class _Profile {
     });
     effect(() => {
       if (this.idToken() && this.idToken().sub) {
+        this.displayWait.set(true);
         this.profileService.getProfileModel(this.idToken().sub).subscribe({
           next: (res) => {
             this.profileModel.set(res);
@@ -70415,5 +70416,5 @@ var App = class _App {
 
 // src/main.ts
 bootstrapApplication(App, appConfig).catch((err) => console.error(err));
-//# debugId=ec75516a-7621-5672-9104-31263a7eeaf9
+//# debugId=ffede150-41a5-501f-919d-df938756bf6b
 //# sourceMappingURL=main.js.map

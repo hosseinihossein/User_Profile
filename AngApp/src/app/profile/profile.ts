@@ -43,6 +43,7 @@ export class Profile {
     });
     effect(()=>{
       if(this.idToken() && this.idToken().sub){
+        this.displayWait.set(true);
         this.profileService.getProfileModel(this.idToken().sub).subscribe({
           next: res => {
             this.profileModel.set(res);
