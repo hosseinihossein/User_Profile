@@ -1,6 +1,7 @@
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using AspApp.Models;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -28,7 +29,8 @@ public class Program
         //******************* Kestrel *******************
         builder.WebHost.ConfigureKestrel(options =>
         {
-            options.Listen(IPAddress.Any, builder.Configuration.GetValue<int>("TcpPort"), listenOptions =>
+            options.Listen(IPAddress.Any, 80);
+            /*builder.Configuration.GetValue<int>("TcpPort"), listenOptions =>
             {
                 string pemFilePath = Path.Combine(certsDirPath, "HoLibz.com.pem");
                 string keyFilePath = Path.Combine(certsDirPath, "HoLibz.com.key");
@@ -41,7 +43,7 @@ public class Program
                 {
                     listenOptions.UseHttps();
                 }
-            });
+            });*/
 
             options.Limits.MaxRequestBodySize = 16 * 1024;// 16 KB
         });
@@ -83,7 +85,7 @@ public class Program
         {
             // Note: the validation handler uses OpenID Connect discovery
             // to retrieve the issuer signing keys used to validate tokens.
-            options.SetIssuer(builder.Configuration["OidcIssuer"] ?? "https://localhost:5443/");
+            options.SetIssuer(builder.Configuration["OidcIssuer"] ?? "http://My_Authorization/");
 
             // Register the encryption credentials. This sample uses a symmetric
             // encryption key that is shared between the server and the API project.
@@ -112,7 +114,7 @@ public class Program
 
         builder.Services.AddControllersWithViews(options =>
         {
-            options.Filters.Add(new RequireHttpsAttribute());
+            //options.Filters.Add(new RequireHttpsAttribute());
         });
 
 
@@ -127,11 +129,11 @@ public class Program
 
 
         //**************************** Custom Services **************************
-        builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
+        //builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
 
 
 
-        if (builder.Environment.IsDevelopment())
+        /*if (builder.Environment.IsDevelopment())
         {
             builder.Services.AddCors(options =>
             {
@@ -142,7 +144,7 @@ public class Program
                     .AllowAnyMethod();
                 });
             });
-        }
+        }*/
 
 
 
@@ -150,15 +152,22 @@ public class Program
 
 
 
-        if (builder.Environment.IsDevelopment())
+        /*if (builder.Environment.IsDevelopment())
         {
             app.UseCors("AllowSpecificOrigin");
-        }
+        }*/
 
 
 
-        app.UseHttpsRedirection();
-        app.UseStaticFiles(new StaticFileOptions { ServeUnknownFileTypes = true });
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        });
+
+
+
+        //app.UseHttpsRedirection();
+        //app.UseStaticFiles(new StaticFileOptions { ServeUnknownFileTypes = true });
         app.UseRouting();
 
         app.UseAuthentication();
@@ -167,7 +176,7 @@ public class Program
         app.MapControllers();
         app.MapDefaultControllerRoute();
 
-        app.Map("/{*catchAll}", async (HttpContext context, FileExtensionContentTypeProvider provider) =>
+        /*app.Map("/{*catchAll}", async (HttpContext context, FileExtensionContentTypeProvider provider) =>
         {
             string? catchAll = context.Request.RouteValues["catchAll"]?.ToString();
             if (!string.IsNullOrWhiteSpace(catchAll))
@@ -196,12 +205,13 @@ public class Program
             await context.Response.SendFileAsync(
                 Path.Combine(app.Environment.WebRootPath, "AngularApp", "browser", "index.html")
             );
-        });
+        });*/
 
 
 
         //******************* app.Run ******************
-        Console.WriteLine($"\n*** App is running on all network interfaces on port '{builder.Configuration["TcpPort"]}'");
+        //Console.WriteLine($"\n*** App is running on all network interfaces on port '{builder.Configuration["TcpPort"]}'");
+        Console.WriteLine($"\n*** App is running on all network interfaces on port '80'");
         app.Run();
     }
 }

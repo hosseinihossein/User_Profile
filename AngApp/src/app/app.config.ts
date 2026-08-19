@@ -22,9 +22,9 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAuth({
       config: {
-        authority: 'https://localhost:5443',
-        redirectUrl: "https://localhost:5445",
-        postLogoutRedirectUri: "https://localhost:5445",
+        authority: 'https://192.168.1.251/',
+        redirectUrl: "https://192.168.1.251/UserProfile",
+        postLogoutRedirectUri: "https://192.168.1.251/UserProfile",
         clientId: 'UserProfileApp',
         scope: 'openid email roles offline_access',
         responseType: 'code',

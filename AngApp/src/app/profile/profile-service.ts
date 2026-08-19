@@ -7,7 +7,7 @@ export class ProfileService {
     private readonly httpClient = inject(HttpClient);
 
     getProfileModel(id:string){
-        return this.httpClient.get<Profile_Model>("/UserProfile/Api/ProfileModel");
+        return this.httpClient.get<Profile_Model>("/Api/UserProfile/ProfileModel");
     }
 
     getProfileImageAddress(profileModel:{
@@ -17,7 +17,7 @@ export class ProfileService {
         remoteImageUrl?:string|null
     }|null):string|null{
         if(profileModel?.hasImage && profileModel.id){
-            return `/UserProfile/Api/ProfileImage?id=${profileModel.id}&v=${profileModel.imageVersion}`;
+            return `/Api/UserProfile/ProfileImage?id=${profileModel.id}&v=${profileModel.imageVersion}`;
         }
         else if(profileModel?.remoteImageUrl){
             return profileModel.remoteImageUrl;
@@ -26,18 +26,18 @@ export class ProfileService {
     }
 
     getCsrf(){
-        return this.httpClient.get("/UserProfile/Api/GetCsrf");
+        return this.httpClient.get("/Api/UserProfile/GetCsrf");
     }
 
     postUserImage(userImage:File){
         let formData = new FormData();
         formData.append("UserImage",userImage);
         return this.httpClient.post<{success:boolean,hasImage:boolean,imageVersion:number}>(
-            "/UserProfile/Api/SubmitUserImage", formData
+            "/Api/UserProfile/SubmitUserImage", formData
         );
     }
     deleteUserImage(){
-        return this.httpClient.delete<{success:boolean}>("/UserProfile/Api/DeleteUserImage");
+        return this.httpClient.delete<{success:boolean}>("/Api/UserProfile/DeleteUserImage");
     }
 
 }

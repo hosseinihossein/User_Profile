@@ -16,7 +16,7 @@ using static OpenIddict.Abstractions.OpenIddictConstants;
 namespace AspApp.Controllers;
 
 [ApiController]
-[Route("[controller]/Api/[action]")]
+[Route("Api/[controller]/[action]")]
 public class UserProfileController : ControllerBase
 {
     private readonly UserManager<Identity_UserDbModel> _userManager;
@@ -62,15 +62,15 @@ public class UserProfileController : ControllerBase
             CreatedAt = user.CreatedAt,
             Description = user.Description,
             DisplayName = user.DisplayName,
-            Email = user.Email!,
+            Email = user.Email!,                                //need to get from claims not database
             EmailConfirmed = user.EmailConfirmed,
             HasImage = user.HasImage,
-            Id = user.Id,
+            Id = user.Id,                                       //need to get from claims not database
             ImageVersion = user.ImageVersion,
             PublicEmail = user.PublicEmail,
             RemoteImageUrl = user.RemoteImageUrl,
             Username = user.UserName!,
-            Roles = [.. await _userManager.GetRolesAsync(user)],
+            Roles = [.. await _userManager.GetRolesAsync(user)],//need to get from claims not database
         };
 
         return Ok(profileModel);
