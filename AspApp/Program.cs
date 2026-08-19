@@ -91,7 +91,7 @@ public class Program
             // Note: in a real world application, this encryption key should be
             // stored in a safe place (e.g in Azure KeyVault, stored as a secret).
             options.AddEncryptionKey(new SymmetricSecurityKey(
-                Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY="))
+                Convert.FromBase64String(builder.Configuration["OidcServerEncryptionKey"]!))
             );
 
             // Register the System.Net.Http integration.
