@@ -69,6 +69,14 @@ export class Profile {
     this.displayWait.set(true);
   }
 
+  getClientInfo(){
+    this.profileService.getClientInfo().subscribe({
+      next: res =>{
+        console.log("client-info= " + JSON.stringify(res));
+      },
+    });
+  }
+
   editProfileImage(){
     if(!this.profileModel()) return;
 

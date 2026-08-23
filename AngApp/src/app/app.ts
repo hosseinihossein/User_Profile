@@ -20,6 +20,14 @@ export class App {
     // restores stored sessions, and starts silent renewal.
     this.oidcSecurityService.checkAuth().subscribe(({ isAuthenticated }) => {
       console.log("isAuthenticated: "+isAuthenticated);
+      if(isAuthenticated){
+        this.oidcSecurityService.getPayloadFromIdToken().subscribe(p=>{
+          console.log("idToken: " + JSON.stringify(p,null,2));
+        });
+        /*this.oidcSecurityService.getPayloadFromAccessToken().subscribe(p=>{
+          console.log("accessToken: " + JSON.stringify(p,null,2));
+        });*/
+      }
       this.singleton.authChekced.set(true);
     });
   }

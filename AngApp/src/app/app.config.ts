@@ -22,7 +22,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAuth({
       config: {
-        authority: 'https://192.168.1.251/',
+        authority: 'https://192.168.1.251',
         redirectUrl: "https://192.168.1.251/UserProfile",
         postLogoutRedirectUri: "https://192.168.1.251/UserProfile",
         clientId: 'UserProfileApp',

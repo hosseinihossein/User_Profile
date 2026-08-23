@@ -23,6 +23,8 @@ public class Program
         //******************* Certs *******************
         string certsDirPath = Path.Combine(builder.Environment.ContentRootPath, "Certs");
         Directory.CreateDirectory(certsDirPath);
+        //string serverSigningCertPath = Path.Combine(certsDirPath, "oidc-server-signing-certificate.pfx");
+        //X509Certificate2 serverSigningCert = X509CertificateLoader.LoadPkcs12FromFile(serverSigningCertPath, string.Empty);
 
 
 
@@ -85,7 +87,7 @@ public class Program
         {
             // Note: the validation handler uses OpenID Connect discovery
             // to retrieve the issuer signing keys used to validate tokens.
-            options.SetIssuer(builder.Configuration["OidcIssuer"] ?? "http://My_Authorization/");
+            options.SetIssuer(builder.Configuration["OidcIssuer"] ?? "https://192.168.1.251/");
 
             // Register the encryption credentials. This sample uses a symmetric
             // encryption key that is shared between the server and the API project.
@@ -93,14 +95,22 @@ public class Program
             // Note: in a real world application, this encryption key should be
             // stored in a safe place (e.g in Azure KeyVault, stored as a secret).
             options.AddEncryptionKey(new SymmetricSecurityKey(
-                Convert.FromBase64String(builder.Configuration["OidcServerEncryptionKey"]!))
-            );
+                //Convert.FromBase64String(builder.Configuration["OidcServerEncryptionKey"]!)
+                Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")
+            ));
+            //options.AddEncryptionCertificate();
 
             // Register the System.Net.Http integration.
-            options.UseSystemNetHttp();
+            options.UseSystemNetHttp()
+            .ConfigureHttpClientHandler(handler =>
+            {
+                handler.ServerCertificateCustomValidationCallback =
+                HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
+            });
 
             // Register the ASP.NET Core host.
             options.UseAspNetCore();
+
         });
 
         builder.Services.AddAuthentication(options =>
@@ -161,7 +171,8 @@ public class Program
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
+            KnownIPNetworks = {new System.Net.IPNetwork(IPAddress.Parse("172.18.0.0"),16)}
         });
 
 
@@ -175,6 +186,15 @@ public class Program
 
         app.MapControllers();
         app.MapDefaultControllerRoute();
+
+        app.MapGet("/client-info", (HttpContext context) =>
+        {
+            var ip = context.Connection.RemoteIpAddress?.ToString();
+            var scheme = context.Request.Scheme;
+            var headers = context.Request.Headers.Select(h=>h.Key+" = "+h.Value.ToString());
+            var claims = context.User.Claims.Select(c => c.Type + ": " + c.Value);
+            return Results.Ok(new { ClientIP = ip, Scheme = scheme, Headers = headers, Cliams = claims });
+        });
 
         /*app.Map("/{*catchAll}", async (HttpContext context, FileExtensionContentTypeProvider provider) =>
         {

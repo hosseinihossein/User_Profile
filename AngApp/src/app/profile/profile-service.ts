@@ -6,6 +6,10 @@ import { Profile_Model } from './profile';
 export class ProfileService {
     private readonly httpClient = inject(HttpClient);
 
+    getClientInfo(){
+        return this.httpClient.get("/client-info");
+    }
+
     getProfileModel(id:string){
         return this.httpClient.get<Profile_Model>("/Api/UserProfile/ProfileModel");
     }

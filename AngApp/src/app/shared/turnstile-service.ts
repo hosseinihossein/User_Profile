@@ -23,7 +23,7 @@ export class TurnstileService {
     }
 
     checkTurnstile(){
-        this.httpClient.get<{enableTurnstile:boolean}>("/Identity/Api/User/EnableTurnstile").subscribe({
+        this.httpClient.get<{enableTurnstile:boolean}>("/Api/UserProfile/EnableTurnstile").subscribe({
             next: res => {
                 //console.log(res);
                 if(res && res.enableTurnstile === true){

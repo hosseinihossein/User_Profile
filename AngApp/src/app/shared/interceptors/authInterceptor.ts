@@ -12,6 +12,7 @@ export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn):
         oidcSecurityService.getAccessToken().subscribe(token=>{
             cloned = req.clone({setHeaders: {Authorization: "Bearer " + token}});
             //return next(cloned);// wrong, doesn't work.
+            //console.log("Authorization: "+cloned.headers.get("Authorization"));
         });
     }
     else{
