@@ -23,8 +23,6 @@ public class Program
         //******************* Certs *******************
         string certsDirPath = Path.Combine(builder.Environment.ContentRootPath, "Certs");
         Directory.CreateDirectory(certsDirPath);
-        //string serverSigningCertPath = Path.Combine(certsDirPath, "oidc-server-signing-certificate.pfx");
-        //X509Certificate2 serverSigningCert = X509CertificateLoader.LoadPkcs12FromFile(serverSigningCertPath, string.Empty);
 
 
 
@@ -32,21 +30,6 @@ public class Program
         builder.WebHost.ConfigureKestrel(options =>
         {
             options.Listen(IPAddress.Any, 80);
-            /*builder.Configuration.GetValue<int>("TcpPort"), listenOptions =>
-            {
-                string pemFilePath = Path.Combine(certsDirPath, "HoLibz.com.pem");
-                string keyFilePath = Path.Combine(certsDirPath, "HoLibz.com.key");
-                if (System.IO.File.Exists(pemFilePath) && System.IO.File.Exists(keyFilePath))
-                {
-                    X509Certificate2 x509Certificate2 = X509Certificate2.CreateFromPemFile(pemFilePath, keyFilePath);
-                    listenOptions.UseHttps(x509Certificate2);
-                }
-                else
-                {
-                    listenOptions.UseHttps();
-                }
-            });*/
-
             options.Limits.MaxRequestBodySize = 16 * 1024;// 16 KB
         });
 
@@ -87,7 +70,7 @@ public class Program
         {
             // Note: the validation handler uses OpenID Connect discovery
             // to retrieve the issuer signing keys used to validate tokens.
-            options.SetIssuer(builder.Configuration["OidcIssuer"] ?? "https://192.168.1.251/");
+            options.SetIssuer(builder.Configuration["HostName"] ?? "https://192.168.1.251/");
 
             // Register the encryption credentials. This sample uses a symmetric
             // encryption key that is shared between the server and the API project.
@@ -95,8 +78,7 @@ public class Program
             // Note: in a real world application, this encryption key should be
             // stored in a safe place (e.g in Azure KeyVault, stored as a secret).
             options.AddEncryptionKey(new SymmetricSecurityKey(
-                //Convert.FromBase64String(builder.Configuration["OidcServerEncryptionKey"]!)
-                Convert.FromBase64String("DRjd/GnduI3Efzen9V9BvbNUfc/VKgXltV7Kbk9sMkY=")
+                Convert.FromBase64String(builder.Configuration["OidcServerEncryptionKey"]!)
             ));
             //options.AddEncryptionCertificate();
 
@@ -104,6 +86,7 @@ public class Program
             options.UseSystemNetHttp()
             .ConfigureHttpClientHandler(handler =>
             {
+                //accept self-signed tls
                 handler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
             });
@@ -122,10 +105,7 @@ public class Program
 
 
 
-        builder.Services.AddControllersWithViews(options =>
-        {
-            //options.Filters.Add(new RequireHttpsAttribute());
-        });
+        builder.Services.AddControllersWithViews();
 
 
 
@@ -138,41 +118,14 @@ public class Program
 
 
 
-        //**************************** Custom Services **************************
-        //builder.Services.AddSingleton<FileExtensionContentTypeProvider>();
-
-
-
-        /*if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.AddCors(options =>
-            {
-                options.AddPolicy("AllowSpecificOrigin", policy =>
-                {
-                    policy.WithOrigins("https://localhost:5443", "https://localhost:5444")
-                    .AllowAnyHeader()
-                    .AllowAnyMethod();
-                });
-            });
-        }*/
-
-
-
         var app = builder.Build();
-
-
-
-        /*if (builder.Environment.IsDevelopment())
-        {
-            app.UseCors("AllowSpecificOrigin");
-        }*/
 
 
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions
         {
             ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto,
-            KnownIPNetworks = {new System.Net.IPNetwork(IPAddress.Parse("172.18.0.0"),16)}
+            KnownIPNetworks = { new System.Net.IPNetwork(IPAddress.Parse("172.18.0.0"), 16) }
         });
 
 
@@ -187,51 +140,10 @@ public class Program
         app.MapControllers();
         app.MapDefaultControllerRoute();
 
-        app.MapGet("/client-info", (HttpContext context) =>
-        {
-            var ip = context.Connection.RemoteIpAddress?.ToString();
-            var scheme = context.Request.Scheme;
-            var headers = context.Request.Headers.Select(h=>h.Key+" = "+h.Value.ToString());
-            var claims = context.User.Claims.Select(c => c.Type + ": " + c.Value);
-            return Results.Ok(new { ClientIP = ip, Scheme = scheme, Headers = headers, Cliams = claims });
-        });
-
-        /*app.Map("/{*catchAll}", async (HttpContext context, FileExtensionContentTypeProvider provider) =>
-        {
-            string? catchAll = context.Request.RouteValues["catchAll"]?.ToString();
-            if (!string.IsNullOrWhiteSpace(catchAll))
-            {
-                string staticFilePath =
-                Path.Combine(app.Environment.WebRootPath, "AngularApp", "browser", catchAll);
-                if (File.Exists(staticFilePath))
-                {
-                    //var provider = new FileExtensionContentTypeProvider();
-                    if (provider.TryGetContentType(staticFilePath, out string? contentType))
-                    {
-                        context.Response.ContentType = contentType;
-                        await context.Response.SendFileAsync(staticFilePath);
-                        return;
-                    }
-                    else
-                    {
-                        context.Response.ContentType = "application/octet-stream";
-                        await context.Response.SendFileAsync(staticFilePath);
-                        return;
-                    }
-                }
-            }
-
-            context.Response.ContentType = "text/html";
-            await context.Response.SendFileAsync(
-                Path.Combine(app.Environment.WebRootPath, "AngularApp", "browser", "index.html")
-            );
-        });*/
-
 
 
         //******************* app.Run ******************
-        //Console.WriteLine($"\n*** App is running on all network interfaces on port '{builder.Configuration["TcpPort"]}'");
-        Console.WriteLine($"\n*** App is running on all network interfaces on port '80'");
+        Console.WriteLine($"\n*** App is running on all networks port '80'");
         app.Run();
     }
 }

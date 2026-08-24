@@ -83,7 +83,7 @@
         @else {
         @if(oidcSecurityService.authenticated().isAuthenticated){
         <button matButton="" (click)="logout()">Logout</button>
-        <button matButton="" (click)="getClientInfo()">ClientInfo</button>
+        <!--button matButton="" (click)="getClientInfo()">ClientInfo</button-->
         @if(idToken()?.sub === profileModel()?.id){
         <button matButton="" (click)="editMode.set(true)">Edit</button>
         }
