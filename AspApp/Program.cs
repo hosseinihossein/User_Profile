@@ -70,7 +70,7 @@ public class Program
         {
             // Note: the validation handler uses OpenID Connect discovery
             // to retrieve the issuer signing keys used to validate tokens.
-            options.SetIssuer(builder.Configuration["HostName"] ?? "https://192.168.1.251/");
+            options.SetIssuer(builder.Configuration["OidcIssuer"]!);
 
             // Register the encryption credentials. This sample uses a symmetric
             // encryption key that is shared between the server and the API project.
