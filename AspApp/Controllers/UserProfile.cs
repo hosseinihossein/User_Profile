@@ -5,6 +5,9 @@ using AspApp.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
+using MongoDB.Bson.IO;
+using MongoDB.Driver;
 using OpenIddict.Abstractions;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
@@ -15,14 +18,21 @@ namespace AspApp.Controllers;
 public class UserProfileController : ControllerBase
 {
     private readonly string _storage_Users = Path.Combine("Storage", "Identity", "Users");
+    private readonly IMongoCollection<BsonDocument> _userProfileCollection;
 
-    public UserProfileController()
+
+
+    public UserProfileController(
+        IMongoDatabase userDb,
+        IConfiguration configuration
+    )
     {
-
+        _userProfileCollection = userDb.GetCollection<BsonDocument>(configuration["MongoDB:ProfileCollectionName"] ?? "Profile");
     }
 
 
 
+    // **********    Anti Forgery    **********
     [HttpGet]
     [GenerateAntiforgeryTokenCookie]
     [Authorize]
@@ -32,32 +42,46 @@ public class UserProfileController : ControllerBase
     }
 
 
+
+    // **********    Turnstile    **********
     [HttpGet]
-    public IActionResult EnableTurnstile([FromServices] IConfiguration configuration)
+    public IActionResult IsTurnstileEnabled([FromServices] IConfiguration configuration)
     {
-        return Ok(new { enableTurnstile = configuration.GetValue<bool>("Turnstile:Enabled", false) });
+        return Ok(new { turnstileEnabled = configuration.GetValue<bool>("Turnstile:Enabled", false) });
     }
 
 
+
+    // **********    Profile Model    **********
     [HttpGet]
     [Authorize]
     public async Task<IActionResult> ProfileModel()
     {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
+        if (!Guid.TryParseExact(User.GetClaim(Claims.Subject), "D", out Guid userGuid))
         {
-            return Forbid();
+            ModelState.AddModelError("User", "Couldn't parse user id!");
+            return BadRequest(ModelState);
         }
 
-        User_Profile_Model profileModel = new()
+        string? json = await GetProfileJson(userGuid);
+
+        if (json is null)
+        {
+            ModelState.AddModelError("User", "User not found!");
+            return BadRequest(ModelState);
+        }
+
+        return Content(json, "application/json");
+
+        /*User_Profile_Model profileModel = new()
         {
             CreatedAt = user.CreatedAt,
             Description = user.Description,
             DisplayName = user.DisplayName,
-            Email = user.Email!,                                //need to get from claims not database
+            Email = user.Email!,                   //need to get from claims not database
             EmailConfirmed = user.EmailConfirmed,
             HasImage = user.HasImage,
-            Id = user.Id,                                       //need to get from claims not database
+            Id = user.Id,                          //need to get from claims not database
             ImageVersion = user.ImageVersion,
             PublicEmail = user.PublicEmail,
             RemoteImageUrl = user.RemoteImageUrl,
@@ -65,11 +89,55 @@ public class UserProfileController : ControllerBase
             Roles = [.. await _userManager.GetRolesAsync(user)],//need to get from claims not database
         };
 
-        return Ok(profileModel);
+        return Ok(profileModel);*/
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ProfileModel([FromQuery] string userId)
+    {
+        if (!Guid.TryParseExact(userId, "D", out Guid userGuid))
+        {
+            ModelState.AddModelError("User", "Couldn't parse user id!");
+            return BadRequest(ModelState);
+        }
+
+        string? json = await GetProfileJson(userGuid);
+
+        if (json is null)
+        {
+            ModelState.AddModelError("User", "User not found!");
+            return BadRequest(ModelState);
+        }
+
+        return Content(json, "application/json");
+    }
+
+    private async Task<string?> GetProfileJson(Guid userGuid)
+    {
+        var filter = Builders<BsonDocument>.Filter
+        .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
+
+        using var cursor = await _userProfileCollection.FindAsync(filter);
+        var userProfileBsonDoc = await cursor.FirstOrDefaultAsync();
+
+        if (userProfileBsonDoc is null)
+        {
+            return null;
+        }
+
+        string json = userProfileBsonDoc.ToJson(
+            new JsonWriterSettings()
+            {
+                OutputMode = JsonOutputMode.RelaxedExtendedJson,
+            }
+        );
+
+        return json;
     }
 
 
 
+    // **********    Profile Image    **********
     [HttpGet]
     public async Task<IActionResult> ProfileImage([FromQuery] Guid id,
     [FromServices] IWebHostEnvironment _env)
@@ -147,38 +215,11 @@ public class UserProfileController : ControllerBase
 
 
 
+    // **********    Name    **********
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditUsername([FromForm][StringLength(64)] string Username)
-    {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        IdentityResult result = await _userManager.SetUserNameAsync(user, Username);
-        if (result.Succeeded)
-        {
-            return Ok();
-        }
-        else
-        {
-            foreach (IdentityError error in result.Errors)
-            {
-                ModelState.AddModelError(nameof(Username), error.Description);
-            }
-            return BadRequest(ModelState);
-        }
-    }
-
-
-
-    [HttpPost]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditDisplayName([FromForm][StringLength(64)] string DisplayName)
+    public async Task<IActionResult> EditName([FromForm][StringLength(64)] string DisplayName)
     {
         var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
@@ -204,93 +245,11 @@ public class UserProfileController : ControllerBase
 
 
 
+    // **********    Email Privacy    **********
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> ChangeEmail([FromForm][StringLength(128)] string NewEmail)
-    {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        string token = await _userManager.GenerateChangeEmailTokenAsync(user, NewEmail);
-        string encodedToken = WebUtility.UrlEncode(token);
-
-        //create an email message with the confirm-new-email link and send it to the new email address
-
-        return Ok();
-    }
-
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> ConfirmNewEmail([FromQuery][StringLength(128)] string newEmail,
-    [FromQuery][StringLength(256)] string token)
-    {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        string decodedToken = WebUtility.UrlDecode(token);
-        IdentityResult result = await _userManager.ChangeEmailAsync(user, newEmail, decodedToken);
-        if (result.Succeeded)
-        {
-            return Redirect("/");
-        }
-        else
-        {
-            return Redirect($"/Error?{result.Errors.SelectMany(e => e.Description + ",,")}");
-        }
-    }
-
-    [HttpPost]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> SendEmailValidationCode()
-    {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        string token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        string encodedToken = WebUtility.UrlEncode(token);
-
-        //create an email message with the confirm-email link and send it to the user's email address
-
-        return Ok();
-    }
-
-    [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> ConfirmEmail([FromQuery][StringLength(256)] string token)
-    {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        string decodedToken = WebUtility.UrlDecode(token);
-        IdentityResult result = await _userManager.ConfirmEmailAsync(user, decodedToken);
-        if (result.Succeeded)
-        {
-            return Redirect("/");
-        }
-        else
-        {
-            return Redirect($"/Error?{result.Errors.SelectMany(e => e.Description + ",,")}");
-        }
-    }
-
-    [HttpPost]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> PublicEmail([FromForm] bool PublicEmail)
+    public async Task<IActionResult> EmailPrivacy([FromForm] bool PublicEmail)
     {
         var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
         if (user is null)
@@ -316,6 +275,7 @@ public class UserProfileController : ControllerBase
 
 
 
+    // **********    Description    **********
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
