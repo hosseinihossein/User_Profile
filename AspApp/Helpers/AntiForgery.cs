@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Mvc.Filters;
 
-namespace AspApp.Filters;
+namespace AspApp.Helpers;
 
 public class GenerateAntiforgeryTokenCookieAttribute : ResultFilterAttribute
 {

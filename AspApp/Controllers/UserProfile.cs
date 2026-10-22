@@ -1,30 +1,24 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
-using System.Security.Principal;
-using AspApp.Filters;
+using AspApp.Helpers;
 using AspApp.Models;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
-using OpenIddict.Server.AspNetCore;
-using OpenIddict.Validation.AspNetCore;
 using static OpenIddict.Abstractions.OpenIddictConstants;
 
 namespace AspApp.Controllers;
 
 [ApiController]
-[Route("Api/[controller]/[action]")]
+[Route("api/[controller]/[action]")]
 public class UserProfileController : ControllerBase
 {
-    private readonly UserManager<Identity_UserDbModel> _userManager;
     private readonly string _storage_Users = Path.Combine("Storage", "Identity", "Users");
 
-    public UserProfileController(UserManager<Identity_UserDbModel> userManager)
+    public UserProfileController()
     {
-        _userManager = userManager;
+
     }
 
 
@@ -32,19 +26,17 @@ public class UserProfileController : ControllerBase
     [HttpGet]
     [GenerateAntiforgeryTokenCookie]
     [Authorize]
-    public IActionResult GetCsrf()
+    public IActionResult GetAntiForgery()
     {
         return Ok();
     }
 
 
-
     [HttpGet]
     public IActionResult EnableTurnstile([FromServices] IConfiguration configuration)
     {
-        return Ok(new { enableTurnstile = configuration.GetValue<bool>("TurnsTileEnable", false) });
+        return Ok(new { enableTurnstile = configuration.GetValue<bool>("Turnstile:Enabled", false) });
     }
-
 
 
     [HttpGet]

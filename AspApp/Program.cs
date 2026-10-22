@@ -1,13 +1,8 @@
 using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using AspApp.Models;
+using AspApp.Helpers;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using OpenIddict.Server.AspNetCore;
+using MongoDB.Driver;
 using OpenIddict.Validation.AspNetCore;
 
 namespace AspApp;
@@ -19,13 +14,6 @@ public class Program
         var builder = WebApplication.CreateBuilder(args);
 
 
-
-        //******************* Certs *******************
-        string certsDirPath = Path.Combine(builder.Environment.ContentRootPath, "Certs");
-        Directory.CreateDirectory(certsDirPath);
-
-
-
         //******************* Kestrel *******************
         builder.WebHost.ConfigureKestrel(options =>
         {
@@ -34,37 +22,7 @@ public class Program
         });
 
 
-
-        // Identity DbContext
-        builder.Services.AddDbContext<Identity_DbContext>(options =>
-        {
-            options.UseNpgsql(builder.Configuration["ConnectionStrings_Postgres:IdentityConnection"]);
-        });
-
-
-
-        //******************* Identity service *******************
-        builder.Services.AddIdentity<Identity_UserDbModel, Identity_RoleDbModel>(options =>
-        {
-            options.User.AllowedUserNameCharacters =
-            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._";
-
-            options.User.RequireUniqueEmail = true;
-
-            options.SignIn.RequireConfirmedEmail = false;
-
-            options.Password.RequireDigit = false;
-            options.Password.RequiredLength = 5;
-            options.Password.RequireLowercase = false;
-            options.Password.RequireUppercase = false;
-            options.Password.RequireNonAlphanumeric = false;
-            options.Password.RequiredUniqueChars = 1;
-        })
-        .AddEntityFrameworkStores<Identity_DbContext>()
-        .AddDefaultTokenProviders();
-
-
-
+        //******************* OpenIdDict *******************
         builder.Services.AddOpenIddict()
         .AddValidation(options =>
         {
@@ -96,17 +54,18 @@ public class Program
 
         });
 
+
+        //******************* Authentication *******************
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-            options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            //options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            //options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
         });
 
 
-
-        builder.Services.AddControllersWithViews();
-
+        //******************* Controllers *******************
+        builder.Services.AddControllers();
 
 
         //******************* AntiForgery *******************
@@ -117,9 +76,27 @@ public class Program
         });
 
 
+        //**************************** Kafka Producer **************************
+        KafkaProducerService kafkaService = new(builder.Configuration);
+        builder.Services.AddSingleton<KafkaProducerService>(kafkaService);
+
+
+        //**************************** Logger **************************
+        builder.Logging.ClearProviders();
+        builder.Logging.AddConsole(); // Keep Console for local visibility
+        builder.Logging.AddKafka(kafkaService, builder.Configuration);
+
+
+        // ************ MongoDb ***********
+        // Register IMongoClient as a Singleton
+        IMongoClient mongoClient = new MongoClient(builder.Configuration["MongoDb:ConnectionString"]);
+        builder.Services.AddSingleton<IMongoClient>(mongoClient);
+        // Register IMongoDatabase directly as a Singleton for quick access
+        IMongoDatabase userDb = mongoClient.GetDatabase(builder.Configuration["MongoDb:UserDbName"]);
+        builder.Services.AddSingleton<IMongoDatabase>(userDb);
+
 
         var app = builder.Build();
-
 
 
         app.UseForwardedHeaders(new ForwardedHeadersOptions
@@ -129,9 +106,6 @@ public class Program
         });
 
 
-
-        //app.UseHttpsRedirection();
-        //app.UseStaticFiles(new StaticFileOptions { ServeUnknownFileTypes = true });
         app.UseRouting();
 
         app.UseAuthentication();
