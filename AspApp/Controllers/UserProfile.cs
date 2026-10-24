@@ -207,7 +207,7 @@ public class UserProfileController : ControllerBase
             }
         }
 
-        //update avatarIdField for user profile document on mongodb
+        //update avatarId for user profile document on mongodb
         var filter = Builders<BsonDocument>.Filter
         .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
 
@@ -271,58 +271,22 @@ public class UserProfileController : ControllerBase
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EditName([FromForm][StringLength(64)] string DisplayName)
+    public async Task<IActionResult> EditName([FromForm][StringLength(128)] string Name)
     {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
+        if (!Guid.TryParseExact(User.GetClaim(Claims.Subject), "D", out Guid userGuid))
         {
-            return Forbid();
-        }
-
-        user.DisplayName = DisplayName;
-        IdentityResult result = await _userManager.UpdateAsync(user);
-        if (result.Succeeded)
-        {
-            return Ok();
-        }
-        else
-        {
-            foreach (IdentityError error in result.Errors)
-            {
-                ModelState.AddModelError(nameof(DisplayName), error.Description);
-            }
+            ModelState.AddModelError("User", "Couldn't parse user id!");
             return BadRequest(ModelState);
         }
-    }
 
+        //update avatarId for user profile document on mongodb
+        var filter = Builders<BsonDocument>.Filter
+        .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
 
+        var update = Builders<BsonDocument>.Update.Set("name", new BsonString(Name));
+        await _userProfileCollection.UpdateOneAsync(filter, update);
 
-    // **********    Email Privacy    **********
-    [HttpPost]
-    [Authorize]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> EmailPrivacy([FromForm] bool PublicEmail)
-    {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
-        {
-            return Forbid();
-        }
-
-        user.PublicEmail = PublicEmail;
-        IdentityResult result = await _userManager.UpdateAsync(user);
-        if (result.Succeeded)
-        {
-            return Ok();
-        }
-        else
-        {
-            foreach (IdentityError error in result.Errors)
-            {
-                ModelState.AddModelError(nameof(PublicEmail), error.Description);
-            }
-            return BadRequest(ModelState);
-        }
+        return Ok();
     }
 
 
@@ -333,26 +297,20 @@ public class UserProfileController : ControllerBase
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> EditDescription([FromForm][StringLength(1024)] string Description)
     {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
+        if (!Guid.TryParseExact(User.GetClaim(Claims.Subject), "D", out Guid userGuid))
         {
-            return Forbid();
-        }
-
-        user.Description = Description;
-        IdentityResult result = await _userManager.UpdateAsync(user);
-        if (result.Succeeded)
-        {
-            return Ok();
-        }
-        else
-        {
-            foreach (IdentityError error in result.Errors)
-            {
-                ModelState.AddModelError(nameof(Description), error.Description);
-            }
+            ModelState.AddModelError("User", "Couldn't parse user id!");
             return BadRequest(ModelState);
         }
+
+        //update avatarId for user profile document on mongodb
+        var filter = Builders<BsonDocument>.Filter
+        .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
+
+        var update = Builders<BsonDocument>.Update.Set("description", new BsonString(Description));
+        await _userProfileCollection.UpdateOneAsync(filter, update);
+
+        return Ok();
     }
 
 
