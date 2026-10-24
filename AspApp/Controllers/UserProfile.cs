@@ -17,17 +17,20 @@ namespace AspApp.Controllers;
 [Route("api/[controller]/[action]")]
 public class UserProfileController : ControllerBase
 {
-    private readonly string _storage_Users = Path.Combine("Storage", "Identity", "Users");
+    //private readonly string _avatarDir = Path.Combine("Storage", "UserProfileAvatar");
     private readonly IMongoCollection<BsonDocument> _userProfileCollection;
+    private readonly DirectoryInfo _avatarDirInfo;
 
 
 
     public UserProfileController(
         IMongoDatabase userDb,
-        IConfiguration configuration
+        IConfiguration configuration,
+        IWebHostEnvironment env
     )
     {
         _userProfileCollection = userDb.GetCollection<BsonDocument>(configuration["MongoDB:ProfileCollectionName"] ?? "Profile");
+        _avatarDirInfo = Directory.CreateDirectory(Path.Combine(env.ContentRootPath, "Storage", "UserProfileAvatar"));
     }
 
 
@@ -52,10 +55,10 @@ public class UserProfileController : ControllerBase
 
 
 
-    // **********    Profile Model    **********
+    // **********    Model    **********
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> ProfileModel()
+    public async Task<IActionResult> Model()
     {
         if (!Guid.TryParseExact(User.GetClaim(Claims.Subject), "D", out Guid userGuid))
         {
@@ -63,15 +66,15 @@ public class UserProfileController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        string? json = await GetProfileJson(userGuid);
+        BsonDocument? bsonDoc = await GetModelBson(userGuid);
 
-        if (json is null)
+        if (bsonDoc is null)
         {
             ModelState.AddModelError("User", "User not found!");
             return BadRequest(ModelState);
         }
 
-        return Content(json, "application/json");
+        return Content(BsonToJson(bsonDoc), "application/json");
 
         /*User_Profile_Model profileModel = new()
         {
@@ -93,7 +96,7 @@ public class UserProfileController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> ProfileModel([FromQuery] string userId)
+    public async Task<IActionResult> Model([FromQuery] string userId)
     {
         if (!Guid.TryParseExact(userId, "D", out Guid userGuid))
         {
@@ -101,31 +104,47 @@ public class UserProfileController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        string? json = await GetProfileJson(userGuid);
+        BsonDocument? bsonDoc = await GetModelBson(userGuid);
 
-        if (json is null)
+        if (bsonDoc is null)
         {
             ModelState.AddModelError("User", "User not found!");
             return BadRequest(ModelState);
         }
 
-        return Content(json, "application/json");
+        return Content(BsonToJson(bsonDoc), "application/json");
     }
 
-    private async Task<string?> GetProfileJson(Guid userGuid)
+    private async Task<BsonDocument?> GetModelBson(Guid userGuid, string[]? projectItems = null)
     {
         var filter = Builders<BsonDocument>.Filter
         .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
 
-        using var cursor = await _userProfileCollection.FindAsync(filter);
-        var userProfileBsonDoc = await cursor.FirstOrDefaultAsync();
+        IFindFluent<BsonDocument, BsonDocument> findFluent = _userProfileCollection.Find(filter);
 
-        if (userProfileBsonDoc is null)
+        if (projectItems is not null && projectItems.Length > 0)
         {
-            return null;
+            ProjectionDefinition<BsonDocument>? projection = null;
+            foreach (string item in projectItems)
+            {
+                if (!string.IsNullOrWhiteSpace(item))
+                {
+                    projection = Builders<BsonDocument>.Projection.Include(item);
+                }
+            }
+
+            if (projection is not null)
+            {
+                findFluent = findFluent.Project<BsonDocument>(projection);
+            }
         }
 
-        string json = userProfileBsonDoc.ToJson(
+        return await findFluent.FirstOrDefaultAsync();
+    }
+
+    private string BsonToJson(BsonDocument bsonDoc)
+    {
+        string json = bsonDoc.ToJson(
             new JsonWriterSettings()
             {
                 OutputMode = JsonOutputMode.RelaxedExtendedJson,
@@ -137,77 +156,110 @@ public class UserProfileController : ControllerBase
 
 
 
-    // **********    Profile Image    **********
+    // **********    Avatar    **********
     [HttpGet]
-    public async Task<IActionResult> ProfileImage([FromQuery] Guid id,
-    [FromServices] IWebHostEnvironment _env)
+    public async Task<IActionResult> Avatar([FromQuery] string avatarId)
     {
-        string userImagePath =
-        Path.Combine(_env.ContentRootPath, _storage_Users, id.ToString("N"), "image");
+        string avatarFilePath =
+        Path.Combine(_avatarDirInfo.FullName, avatarId);
 
-        if (System.IO.File.Exists(userImagePath))
+        if (System.IO.File.Exists(avatarFilePath))
         {
-            return PhysicalFile(userImagePath, "application/octet-stream", "userImage", true);
+            return PhysicalFile(avatarFilePath, "application/octet-stream", "profileAvatar", true);
         }
 
-        return NotFound("User Image Not Found!");
+        return NotFound("User profile avatar Not found!");
     }
 
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
     [RequestSizeLimit(128 * 1024)]//128 KB
-    public async Task<IActionResult> SubmitUserImage([FromForm] IFormFile UserImage,
-    [FromServices] IWebHostEnvironment _env)
+    public async Task<IActionResult> SubmitAvatar([FromForm] IFormFile UserAvatar)
     {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
+        if (!Guid.TryParseExact(User.GetClaim(Claims.Subject), "D", out Guid userGuid))
         {
-            return Forbid();
+            ModelState.AddModelError("User", "Couldn't parse user id!");
+            return BadRequest(ModelState);
         }
 
-        DirectoryInfo userDirectoryInfo = Directory.CreateDirectory(
-            Path.Combine(_env.ContentRootPath, _storage_Users, user.Id.ToString("N"))
-        );
-        string userImagePath = Path.Combine(userDirectoryInfo.FullName, "image");
-        using (FileStream fs = System.IO.File.Create(userImagePath))
+        BsonDocument? bsonDoc = await GetModelBson(userGuid, ["avatarId"]);
+        if (bsonDoc is null)
         {
-            await UserImage.CopyToAsync(fs);
+            ModelState.AddModelError("User", "User Profile not found!");
+            return BadRequest(ModelState);
         }
 
-        user.HasImage = true;
-        user.ImageVersion++;
+        string avatarId = Guid.NewGuid().ToString("D");
+        string avatarFilePath = Path.Combine(_avatarDirInfo.FullName, avatarId);
+        using (FileStream fs = System.IO.File.Create(avatarFilePath))
+        {
+            await UserAvatar.CopyToAsync(fs);
+        }
 
-        //save
-        await _userManager.UpdateAsync(user);
+        //delete the old avatar file
+        if (bsonDoc.TryGetValue("avatarId", out BsonValue bsonValue) && bsonValue.IsString)
+        {
+            string oldAvatarId = bsonValue.AsString;
+            if (string.IsNullOrWhiteSpace(oldAvatarId))
+            {
+                DeleteAvatarFile(oldAvatarId);
+            }
+        }
 
-        return Ok(new { success = true, user.HasImage, user.ImageVersion });
+        //update avatarIdField for user profile document on mongodb
+        var filter = Builders<BsonDocument>.Filter
+        .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
+
+        var update = Builders<BsonDocument>.Update.Set("avatarId", new BsonString(avatarId));
+        await _userProfileCollection.UpdateOneAsync(filter, update);
+
+        return Ok(new { success = true, avatarId = avatarId });
+    }
+
+    private void DeleteAvatarFile(string avatarId)
+    {
+        string avatarFilePath = Path.Combine(_avatarDirInfo.FullName, avatarId);
+
+        if (System.IO.File.Exists(avatarFilePath))
+        {
+            System.IO.File.Delete(avatarFilePath);
+        }
     }
 
     [HttpDelete]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteUserImage([FromServices] IWebHostEnvironment _env)
+    public async Task<IActionResult> DeleteAvatar()
     {
-        var user = await _userManager.FindByIdAsync(User.GetClaim(Claims.Subject)!);
-        if (user is null)
+        if (!Guid.TryParseExact(User.GetClaim(Claims.Subject), "D", out Guid userGuid))
         {
-            return Forbid();
+            ModelState.AddModelError("User", "Couldn't parse user id!");
+            return BadRequest(ModelState);
         }
 
-        string userImagePath =
-        Path.Combine(_env.ContentRootPath, _storage_Users, user.Id.ToString("N"), "image");
-
-        if (System.IO.File.Exists(userImagePath))
+        BsonDocument? bsonDoc = await GetModelBson(userGuid, ["avatarId"]);
+        if (bsonDoc is null)
         {
-            System.IO.File.Delete(userImagePath);
+            ModelState.AddModelError("User", "User Profile not found!");
+            return BadRequest(ModelState);
+        }
 
-            //edit user
-            user.HasImage = false;
-            user.ImageVersion = 0;
-            user.RemoteImageUrl = null;
+        //delete the avatar file and update database
+        if (bsonDoc.TryGetValue("avatarId", out BsonValue bsonValue) && bsonValue.IsString)
+        {
+            string avatarId = bsonValue.AsString;
+            if (string.IsNullOrWhiteSpace(avatarId))
+            {
+                //delete file
+                DeleteAvatarFile(avatarId);
 
-            await _userManager.UpdateAsync(user);
+                //update mongodb
+                var filter = Builders<BsonDocument>.Filter
+                .Eq("_id", new BsonBinaryData(userGuid, GuidRepresentation.Standard));
+                var update = Builders<BsonDocument>.Update.Unset("avatarId");
+                await _userProfileCollection.UpdateOneAsync(filter, update);
+            }
         }
 
         return Ok(new { success = true });
